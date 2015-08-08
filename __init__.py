@@ -262,15 +262,15 @@ scales = {
     'melodic minor' : [0,2,3,5,7,9,11],
 }
 chords = {
-    'major': [0,4,7],
-    'minor': [0,3,7],
-    'diminished': [0,3,6],
-    'diminished 7': [0,3,6,9],
-    'major 7': [0,4,7,11],
-    'minor 7': [0,3,7,10],
-    'minor 6': [0,3,7,9],
-    'minor major 7': [0,3,6,11],
-    'half-diminished 7': [0,3,6,10],
+    'major': (0,4,7),
+    'minor': (0,3,7),
+    'diminished': (0,3,6),
+    'diminished 7': (0,3,6,9),
+    'major 7': (0,4,7,11),
+    'minor 7': (0,3,7,10),
+    'minor 6': (0,3,7,9),
+    'minor major 7': (0,3,6,11),
+    'half-diminished 7': (0,3,6,10),
 }
 
 '''
@@ -1098,15 +1098,9 @@ chordtxt = {
     'B augmented': 'bSG',
 }
 
-def pitch_class(pitch):
-    return pitch % 12
-
-def pitch_classes(pitches):
-    return (pitch_class(p) for p in pitches)
-
 def is_pure_chord(pitches, root, chord_quality):
     chord_pitches = up(chords[chord_quality], root)
-    chord = list(pitch_classes(chord_pitches))
+    chord = list(get_pitch_classes(chord_pitches))
     for pitch in pitches:
         pc = pitch_class(pitch)
         print pc
@@ -1117,10 +1111,60 @@ def is_pure_chord(pitches, root, chord_quality):
             return False
     return True
 
+
+
 home_dir = '/Users/murftown/'
 with open(home_dir + 'git1/songs/when today becomes tomorrow') as fh:
     when_today_becomes_tomorrow = fh.read() \
         .replace('\n','')
+
+
+
+
+# #todo chord detection (unfinished)
+# given a set of pitches, figure out if it is all notes of a certain chord
+c_maj_arp = [0,4,7,12,16,12,7,4,0]
+Eb_maj_arp = [3,7,10,15,19,15,10,7,3]
+
+def pitch_class(pitch):
+    return pitch % 12
+
+def get_pitch_classes(pitches):
+    # give back the same format you get (list vs generator etc)
+    if isinstance(pitches, list):
+        return [pitch_class(p) for p in pitches]
+    elif isinstance(pitches, tuple):
+        return tuple(pitch_class(p) for p in pitches)
+    else: # generator
+        return (pitch_class(p) for p in pitches)
+
+def subtract_min(pitches):
+    pitches = tuple(pitches) # in case it's a generator, solidify it
+    min_p = min(pitches)
+    # give back the same format you get (list vs generator etc)
+    return tuple(p - min_p for p in pitches)
+
+def try_roots(pitch_classes):
+    'try each of the pitch_classes as if they were the root'
+    pitche_classes = tuple(pitch_classes) # in case it's a generator, solidify it
+    uniq_pitch_classes = set(pitch_classes)
+    for possible_root in uniq_pitch_classes:
+        this_try = tuple(p - possible_root for p in pitch_classes)
+        yield possible_root, get_pitch_classes(this_try) # re-normalize negatives
+
+def detect_pure_chord(pitches):
+    tries = try_roots(get_pitch_classes(pitches))
+    for root, normalized_pitches in tries:
+        chord_type = detect_pure_chord_prenormalized(normalized_pitches)
+        if chord_type:
+            return root, chord_type
+
+def detect_pure_chord_prenormalized(normalized_pitches):
+    uniq_pitches = set(normalized_pitches)
+    for chord_type, chord_pitches in chords.items():
+        if set(chord_pitches) == uniq_pitches:
+            return chord_type
+
 
 def play_something():
     r = random.randint(0,4)
