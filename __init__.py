@@ -1146,11 +1146,17 @@ def subtract_min(pitches):
 
 def try_roots(pitch_classes):
     'try each of the pitch_classes as if they were the root'
-    pitche_classes = tuple(pitch_classes) # in case it's a generator, solidify it
+    pitch_classes = tuple(pitch_classes) # in case it's a generator, solidify it
     uniq_pitch_classes = set(pitch_classes)
     for possible_root in uniq_pitch_classes:
         this_try = tuple(p - possible_root for p in pitch_classes)
         yield possible_root, get_pitch_classes(this_try) # re-normalize negatives
+
+def detect_pure_chord_prenormalized(normalized_pitches):
+    uniq_pitches = set(normalized_pitches)
+    for chord_type, chord_pitches in chords.items():
+        if set(chord_pitches) == uniq_pitches:
+            return chord_type
 
 def detect_pure_chord(pitches):
     tries = try_roots(get_pitch_classes(pitches))
@@ -1159,11 +1165,13 @@ def detect_pure_chord(pitches):
         if chord_type:
             return root, chord_type
 
-def detect_pure_chord_prenormalized(normalized_pitches):
-    uniq_pitches = set(normalized_pitches)
-    for chord_type, chord_pitches in chords.items():
-        if set(chord_pitches) == uniq_pitches:
-            return chord_type
+def detect_pure_chord_strn(mus_strn):
+    pitches = strn2pitches(mus_strn)
+    chordinfo = detect_pure_chord(pitches)
+    if chordinfo:
+        root, chord_type = chordinfo
+        root = note_names[root]
+        return root, chord_type
 
 
 def play_something():
