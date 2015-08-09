@@ -1,4 +1,4 @@
-# use with python3
+# use with python3? nawwww
 
 '''
 #todo beat detection
@@ -8,9 +8,11 @@
 
 '''
 
+from __future__ import print_function
 from getkey import getch
 import datetime, time
 from fractions import Fraction
+import midi
 
 
 class Beat(object):
@@ -35,8 +37,7 @@ class Beat(object):
 
     def guess_delta_len(self, avg_beat_time):
         if avg_beat_time:
-            #todo make not silly
-            sought_ratios = [
+            possible_ratios = [
                 Fraction(1,4), Fraction(1,3), Fraction(1,2),
                 Fraction(1), Fraction(2), Fraction(4), Fraction(8), Fraction(16)
             ]
@@ -46,10 +47,6 @@ class Beat(object):
                 distance_from_1 = abs(multiple_of_this_ratio - 1)
                 if distance_from_1 < best_distance_from_1:
                     best_ratio, best_distance_from_1 = possible_ratio, distance_from_1
-                #lower_bound = possible_ratio * Fraction(8,10) * avg_beat_time
-                #upper_bound = possible_ratio * Fraction(12,10) * avg_beat_time
-                #if lower_bound < self.delta < upper_bound:
-                #    return possible_ratio
             return best_ratio
         else:
             return Fraction(1)
@@ -76,6 +73,7 @@ def listen():
     beat = None
     which_beat_guess, beats_per_measure = 0, 4
     rolling_beat_len_guess = None
+    prev_note = None
     while True:
         prev_beat = beat
         # waits for user tap
@@ -90,6 +88,11 @@ def listen():
             beat = Beat(prev_beat, which_beat_guess)
         which_beat_guess += 1
         which_beat_guess %= 4
+        # play music
+        midi.note_off(prev_note)
+        note = midi.note_numbers[ch]
+        midi.note_on(note)
+        prev_note = note
         # update collections
         beats.append(beat)
         # rolling avg beat length guess

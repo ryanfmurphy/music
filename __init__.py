@@ -69,17 +69,17 @@ def verbose_sleep(dur):
     try: sleep.ticks
     except: sleep.ticks = 0
     if sleep.ticks % 64 == 0:
-        print '------------------'
+        print('------------------')
     elif sleep.ticks % 32 == 0:
-        print '---------------'
+        print('---------------')
     elif sleep.ticks % 16 == 0:
-        print '------------'
+        print('------------')
     elif sleep.ticks % 8 == 0:
-        print '---------'
+        print('---------')
     elif sleep.ticks % 4 == 0:
-        print '------'
+        print('------')
     else:
-        print '---'
+        print('---')
     sleep.ticks += 1
     dur = get_dur(dur)
     time.sleep(dur)
@@ -95,17 +95,17 @@ def verbose_sleep_6_8(dur):
     try: sleep.ticks
     except: sleep.ticks = 0
     if sleep.ticks % 48 == 0:
-        print '------------------'
+        print('------------------')
     elif sleep.ticks % 24 == 0:
-        print '---------------'
+        print('---------------')
     elif sleep.ticks % 12 == 0:
-        print '------------'
+        print('------------')
     elif sleep.ticks % 6 == 0:
-        print '---------'
+        print('---------')
     elif sleep.ticks % 2 == 0:
-        print '------'
+        print('------')
     else:
-        print '---'
+        print('---')
     sleep.ticks += 1
     dur = get_dur(dur)
     time.sleep(dur)
@@ -290,7 +290,7 @@ def play_scales(dur=.2):
     my_scales = random.sample(scales.keys(), 2)
     for scale_type in my_scales:
         scale = scales[scale_type]
-        print scale_type
+        print(scale_type)
         for n in scale: note(n,dur=dur)            # ascending
         for n in scale[-2:0:-1] : note(n,dur=dur)  # descending
     note(scale[0], dur=2)
@@ -305,7 +305,7 @@ def scale_triad(scale, offs, invert=False):
 
 def play_scale_triads(num_octs=2, dur=.2):
     for scale_type,scale in scales.items():
-        print 'triads from the ' + scale_type + ' scale'
+        print('triads from the ' + scale_type + ' scale')
         # ascending
         for i in range(7*num_octs + 1):
             chord(scale_triad(scale, i), dur=dur)
@@ -316,7 +316,7 @@ def play_scale_triads(num_octs=2, dur=.2):
 
 def play_scale_triads_broken(num_octs=1, offs=7, dur=.2):
     for scale_type,scale in scales.items():
-        print 'triads from the ' + scale_type + ' scale'
+        print('triads from the ' + scale_type + ' scale')
         # ascending
         for i in range(7*num_octs):
             notes(scale_triad(scale, i+offs), dur=dur)
@@ -717,6 +717,10 @@ def strn2pitches(strn):
 def play_strn(strn, dur=DURATION):
     notes(strn2pitches(strn), dur=dur)
 
+def strn_note_on(ch):
+    pitch = note_numbers[ch]
+    note_on(pitch)    
+
 #-- Mon Jun 1 2015 --
 
 def wind_chimes():
@@ -866,7 +870,7 @@ def eventsg(ns, dur=.2, vel=VELOCITY, oct=4, sounding_notes = None, leave_soundi
         elif new_notes is not '-':
             sounding_notes = new_notes
 
-        print show_list_spatially(new_notes, sounding_notes, offset=30)
+        print(show_list_spatially(new_notes, sounding_notes, offset=30))
 
         # sleep
         yield ('sleep', dur)
@@ -907,14 +911,14 @@ def read_slowly_from_chars():
     global feed_me_chars
     ptr = 0
     while True:
-        print 'loop'
-        print feed_me_chars, ptr
+        print('loop')
+        print(feed_me_chars, ptr)
         if len(feed_me_chars) > ptr:
-            print ' more!'
+            print(' more!')
             note_char = feed_me_chars[ptr]
-            print ' yield!'
+            print(' yield!')
             yield note_char
-            print ' ptr++'
+            print(' ptr++')
             ptr += 1
         else:
             sleep(.1)
@@ -1103,11 +1107,11 @@ def is_pure_chord(pitches, root, chord_quality):
     chord = list(get_pitch_classes(chord_pitches))
     for pitch in pitches:
         pc = pitch_class(pitch)
-        print pc
+        print(pc)
         if pc in chord:
-            print 'in'
+            print('in')
         else:
-            print 'not in'
+            print('not in')
             return False
     return True
 
