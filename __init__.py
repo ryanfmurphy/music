@@ -448,19 +448,6 @@ def sweet_groove():
 #todo allow a Case Octave Shift to happen after a ' ': e.g. 'm-g-a-b-e-B-c-d---  B-emg-d-s-emgab---', the B should go Down
 
 
-#}{
-#-- Sun Mar 1 2015 --
-
-# By simplifiying one aspect, can we learn new ways of adding complexity and excitement?
-# e.g. if we've been using rich, complex, diverse chords to get excitement,
-# can we simplify the chords and find that rich complex diversity in rhythm or melody or verse?
-
-#-- Sun Mar 22 2015 --
-
-# With Greyson last week, looking at music stuff, and trying an automated StartPage search
-#   --> /Users/murftown/dev/repl-sessions/03-22-15:greyson-music-startpage.py.repl
-
-#}{
 #-- Mon Apr 6 2015 --
 
 def two_hands(parts):
@@ -684,6 +671,25 @@ class Silent(object):
     def __rcmp__(self, i):
         return cmp(int_or_self(i), int_or_self(self))
 
+
+def close_1_big_interval(n, prev):
+    if n == '_': # "_" goes down an octave
+        n = prev - 12
+    elif n == ',': # silently go down an octave
+        n = Silent(prev - 12)
+    elif n == "'": # silently go up an octave
+        n = Silent(prev + 12)
+    else: # figure out what octave to play the next note
+        diff = abs_note_diff(prev,n)
+        if diff >= BIG_OFFSET:
+            #todo #fixme - this following comparison has weird values in it sometimes like None and ''!  seems to work tho
+            if n > prev: # going up?
+                n = subtract_24_til_close_enough(prev, n) # go down instead
+            else: # going down?
+                n = add_24_til_close_enough(prev, n) # go up instead
+    return n
+
+
 def close_big_intervals(nums):
     '''
     change octaves to close up any gaps bigger than say an octave
@@ -691,21 +697,20 @@ def close_big_intervals(nums):
     '''
     prev = None
     for n in nums:
-        if n == '_': # "_" goes down an octave
-            n = prev - 12
-        elif n == ',': # silently go down an octave
-            n = Silent(prev - 12)
-        elif n == "'": # silently go up an octave
-            n = Silent(prev + 12)
-        else: # figure out what octave to play the next note
-            diff = abs_note_diff(prev,n)
-            if diff >= BIG_OFFSET:
-                #todo #fixme - this following comparison has weird values in it sometimes like None and ''!  seems to work tho
-                if n > prev: # going up?
-                    n = subtract_24_til_close_enough(prev, n) # go down instead
-                else: # going down?
-                    n = add_24_til_close_enough(prev, n) # go up instead
+        n = close_1_big_interval(n, prev)
         yield n
+        if n not in ['-',' ']: prev = n
+
+
+def close_big_intervals_interactive():
+    'just like close_big_intervals but you have to .send it the nums and you instantly get the next yield'
+    prev = None
+    n = None
+    while True:
+        n = yield n
+        if n is None: return
+        n = close_1_big_interval(n, prev)
+        #todo #fixme should this next line be above?
         if n not in ['-',' ']: prev = n
 
 def strn2numbers(strn):
@@ -716,6 +721,7 @@ def strn2pitches(strn):
 
 def play_strn(strn, dur=DURATION):
     notes(strn2pitches(strn), dur=dur)
+
 
 def strn_note_on(ch):
     pitch = note_numbers[ch]
