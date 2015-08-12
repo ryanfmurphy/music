@@ -740,7 +740,7 @@ mel.append(nostalgic_arp_melody)
 
 def play_nostalgic_arp_melody():
     play_strn(nostalgic_arp_melody * 2)
-    play_strns([nostalgic_arp_melody * 2, nostalgic_accomp], octs=[0,2])
+    play_strns([nostalgic_arp_melody * 2, nostalgic_accomp], octaves=[0,2])
 
 
 
@@ -894,46 +894,39 @@ def playe(events):
         #if len(e) and e[0] != 'sleep': print str(e)
         lispy_funcall(e, env=globals())
 
-#}{
+#}
 #-- Fri Jun 5 2015 --
 
-'''
-whoa, generators tripping me out!
+# whoa, generators tripping me out!
+# trying to figure out how sending and receiving works
 
-trying to figure out how sending and receiving works
-'''
-
-'''
-#todo figure out how to allow me to type chars in vim and have it play notes
-def yield_me():
-    i = 0
-    while True:
-        x = (yield i)
-        yield x
-        i += 1
-
-feed_me_chars = []
-def read_slowly_from_chars():
-    global feed_me_chars
-    ptr = 0
-    while True:
-        print('loop')
-        print(feed_me_chars, ptr)
-        if len(feed_me_chars) > ptr:
-            print(' more!')
-            note_char = feed_me_chars[ptr]
-            print(' yield!')
-            yield note_char
-            print(' ptr++')
-            ptr += 1
-        else:
-            sleep(.1)
-ReadSlowly = read_slowly_from_chars()
-'''
+##todo figure out how to allow me to type chars in vim and have it play notes
+#def yield_me():
+#    i = 0
+#    while True:
+#        x = (yield i)
+#        yield x
+#        i += 1
+#
+#feed_me_chars = []
+#def read_slowly_from_chars():
+#    global feed_me_chars
+#    ptr = 0
+#    while True:
+#        print('loop')
+#        print(feed_me_chars, ptr)
+#        if len(feed_me_chars) > ptr:
+#            print(' more!')
+#            note_char = feed_me_chars[ptr]
+#            print(' yield!')
+#            yield note_char
+#            print(' ptr++')
+#            ptr += 1
+#        else:
+#            sleep(.1)
+#ReadSlowly = read_slowly_from_chars()
 
 
-
-#}{
 
 #-- Mon Jun 8 2015 --
 
@@ -972,11 +965,22 @@ chorales = {
             'g-gfe-fga-f-d-g-g-----  g-e-c-b-A-G---',
             'c-G-c---f-d-g-_-c-----  c-M---E-S-E-------E--MG-B-c-A-M-B-E---  ',
         ],
+    },
+
+    'evan': {
+        0: [
+            'c-BcdcB-ABcBA-G-c-_-----',
+            'efgfe-d-d-c-B-A-G-B-c---',
+            'g---a-b-bagefgf-g-e-----',
+            'c---e-g---e-d-g-_-c-----',
+        ],
     }
 }
 
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     global chorales
+
+    # choose a chorale if not provided
     if composer is None:
         unique_composers = chorales.keys()
         weighted_composers = []
@@ -987,10 +991,17 @@ def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     if num is None:
         nums = chorales[composer].keys()
         num = random.choice(nums)
+
+    # setup
     chorale = chorales[composer][num]
     octaves = (1,1,0,0)
-    if num == 49: octaves = (1,0,0,0)
-    elif num == 55: octaves = (1,1,0,-1)
+    if composer == 'bach':
+        if num == 49: octaves = (1,0,0,0)
+        elif num == 55: octaves = (1,1,0,-1)
+    elif composer == 'evan':
+        if num == 0: octaves = (2,1,0,0)
+
+    # play it
     play_strns(chorale, octaves = octaves, dur=dur, vel=vel)
 
 def test():
