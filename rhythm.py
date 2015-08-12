@@ -88,7 +88,7 @@ class Beat(object):
                     best_ratio, best_distance_from_1 = possible_ratio, distance_from_1
             return best_ratio
         else:
-            return Fraction(1)
+            return Fraction(0)
 
     def print_which_beat(self):
         beat = self.which_beat_guess + 1
