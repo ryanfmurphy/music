@@ -88,7 +88,7 @@ class Beat(object):
                     best_ratio, best_distance_from_1 = possible_ratio, distance_from_1
             return best_ratio
         else:
-            return Fraction(0)
+            return Fraction(1)
 
     def print_which_beat(self):
         beat = self.which_beat_guess + 1
@@ -155,7 +155,7 @@ def listen():
             beat = Beat(prev_beat)
 
         # record the space before the note if any
-        if beat.delta_len_guess:
+        if prev_beat and beat.delta_len_guess:
             subdivision_factor = 2
             remaining_time_slots = int(beat.delta_len_guess * subdivision_factor) - 1
             note_chars.append('-' * remaining_time_slots)
