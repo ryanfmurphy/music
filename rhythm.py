@@ -149,7 +149,7 @@ def listen():
 
             # non-blocking version:
             while True:
-                time.sleep(.002)
+                #time.sleep(.002)
                 ch = nb_getch()
                 if ch: break
             # blocking version:
@@ -203,7 +203,10 @@ def listen_and_save():
     beats, note_strn = listen()
     print(note_strn)
     if my_db:
-        user_input = raw_input('Save to database? ')
+        #user_input = raw_input('Save to database? ')
+        print('Save to database?', end=' ')
+        user_input = getch()
+        print(user_input)
         save = False
         if user_input in ('cut','shave'):
             indexes = raw_input("Indexes (e.g. [:-1]): ")
