@@ -53,8 +53,6 @@ def close_midi_handler(signal, frame):
 def install_close_handler():
     signal.signal(signal.SIGINT, close_midi_handler)
 
-mel = [] # bank of melodies
-
 def sleep(dur):
     dur = get_dur(dur)
     time.sleep(dur)
@@ -736,7 +734,6 @@ def wind_chimes():
 
 nostalgic_arp_melody = 'cdefgegCECEGcGcedAFAFDaDafdfdAFA'
 nostalgic_accomp     = 'e-e--egfe-e--egef-d---A---D---  '
-mel.append(nostalgic_arp_melody)
 
 def play_nostalgic_arp_melody():
     play_strn(nostalgic_arp_melody * 2)
