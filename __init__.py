@@ -850,15 +850,15 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
         else:
             new_notes = n
 
-        print "sounding notes:", sounding_notes
-        print "whereas new notes:", new_notes
+        #print "sounding notes:", sounding_notes
+        #print "whereas new notes:", new_notes
         if not first_time:
             these_note_offs = []
             for this_note_off in notes_off_g(sounding_notes, oct, new_notes):
-                print '  an off:',this_note_off
+                #print '  an off:',this_note_off
                 these_note_offs.append(this_note_off[1])
                 yield this_note_off
-            if len(these_note_offs): print "off:", these_note_offs,
+            #if len(these_note_offs): print "off:", these_note_offs,
 
         first_time = False
         
@@ -871,7 +871,7 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
                 yield this_note_on
         #if len(these_note_ons): print "on:", these_note_ons
 
-        # update sounding notes
+        # update sounding notes - #todo simplify! why do all this when we already figured out the note offs?
         if isinstance(new_notes, collections.Iterable):
             if not isinstance(sounding_notes, collections.Iterable):
                 sounding_notes = new_notes
@@ -883,6 +883,8 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
                             sounding_notes[i] = nn
                         else:
                             sounding_notes.append(nn)
+                if len(new_notes) < len(sounding_notes):
+                    sounding_notes = sounding_notes[:len(new_notes)]
         elif new_notes is not '-':
             sounding_notes = new_notes
 
@@ -1167,7 +1169,7 @@ def all_of_me_e():
     if coinflip():
         return eventsg_cp(all_of_me, pattern=[0,2,1,2]*2, dur=swung_dur(.4,.2).next)
     else:
-        return eventsg_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),(1,0),(2,0),(0,1)])
+        return eventsg_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),([0,1],0),(2,0),(0,1)])
 
 def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
     playe(
