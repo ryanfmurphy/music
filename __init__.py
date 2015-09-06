@@ -191,8 +191,9 @@ def note(n, dur=.2, vel=VELOCITY, oct=4):
     sleep(dur)
     note_off(n, oct)
 
-def notes(ns, dur=.2, vel=VELOCITY, oct=4):
-    playe(eventsg(ns, vel=vel, oct=oct, dur=dur))
+def notes(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False):
+    if dur is None: dur = DURATION
+    playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding))
 
 
 def chord_on(ns, vel=VELOCITY, oct=4):
@@ -437,6 +438,9 @@ ij4ever = itertools.izip(itertools.cycle(part_i), itertools.cycle(part_j))
 
 izip = itertools.izip_longest
 icycle = itertools.cycle
+ichain = itertools.chain.from_iterable
+lchain = lambda x: list(ichain(x))
+dbl = lambda L: lchain([i,i] for i in L)
 
 def sweet_groove():
    play_forever(izip(cool_lick, cool_lick2, part2)) 
@@ -717,8 +721,8 @@ def strn2numbers(strn):
 def strn2pitches(strn):
     return close_big_intervals(strn2numbers(strn))
 
-def play_strn(strn, dur=DURATION):
-    notes(strn2pitches(strn), dur=dur)
+def play_strn(strn, dur=DURATION, leave_sounding=False):
+    notes(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
 
 
 def strn_note_on(ch):
@@ -738,9 +742,6 @@ nostalgic_accomp     = 'e-e--egfe-e--egef-d---A---D---  '
 def play_nostalgic_arp_melody():
     play_strn(nostalgic_arp_melody * 2)
     play_strns([nostalgic_arp_melody * 2, nostalgic_accomp], octaves=[0,2])
-
-
-
 
 # Bach Invention 4 in Dm
 bach4strn = [
@@ -776,7 +777,7 @@ def play_bach6(dur=None):
 # look at the last_note or all the last_notes
 # as well as the current_note or all the current_notes
 # and decide which notes to turn off
-def notes_off_g(sounding_notes, new_notes, oct):
+def notes_off_g(sounding_notes, oct, new_notes=None):
     if isinstance(sounding_notes, collections.Iterable):
         for i,note in enumerate(sounding_notes):
             corresponding_new_note = None
@@ -786,18 +787,24 @@ def notes_off_g(sounding_notes, new_notes, oct):
                     corresponding_new_note = new_notes[i]
 
             stop_this_note = False
-            #if corresponding_new_note not in [None,'-']:
-            if not do_hold_note(corresponding_new_note):
-                stop_this_note = True
-            elif new_notes is None:
-                stop_this_note = True
-            elif new_notes == '-':
-                stop_this_note = False
+            if corresponding_new_note:
+                if do_hold_note(corresponding_new_note):
+                    stop_this_note = False
+                else:
+                    stop_this_note = True
+            else:
+                if new_notes is None: # don't hold any notes
+                    stop_this_note = True
+                elif new_notes == '-': # hold all notes
+                    stop_this_note = False
+                else: # new, #test 
+                    stop_this_note = True
 
-            if note != '-' and stop_this_note:
+            if note != '-' and stop_this_note: #todo maybe use do_hold_note() instead? not sure
                 yield ('note_off', note, oct)
     else: # single last note
-        if new_notes != '-':
+        #if new_notes != '-':
+        if do_hold_note(new_note): #test
             yield ('note_off', sounding_notes, oct)
 
 
@@ -825,8 +832,11 @@ def show_list_spatially(positions, held_positions=None, offset=0):
 
 iter_type = type(iter([0]))
 
-def eventsg(ns, dur=.2, vel=VELOCITY, oct=4, sounding_notes = None, leave_sounding = False):
+def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_sounding = False, show_notes = True):
     'this generator, treats note on and note off as separate events, and has sleep events in between'
+
+    if dur is None: dur = DURATION
+
     #note: this works pretty well! needs some cleanup
         #todo there's an issue where if one voice runs out of notes before the other
         # it will leave the last note hanging.  None should stop the voice
@@ -840,12 +850,15 @@ def eventsg(ns, dur=.2, vel=VELOCITY, oct=4, sounding_notes = None, leave_soundi
         else:
             new_notes = n
 
+        print "sounding notes:", sounding_notes
+        print "whereas new notes:", new_notes
         if not first_time:
             these_note_offs = []
-            for this_note_off in notes_off_g(sounding_notes, new_notes, oct):
+            for this_note_off in notes_off_g(sounding_notes, oct, new_notes):
+                print '  an off:',this_note_off
                 these_note_offs.append(this_note_off[1])
                 yield this_note_off
-            #if len(these_note_offs): print "off:", these_note_offs,
+            if len(these_note_offs): print "off:", these_note_offs,
 
         first_time = False
         
@@ -873,7 +886,8 @@ def eventsg(ns, dur=.2, vel=VELOCITY, oct=4, sounding_notes = None, leave_soundi
         elif new_notes is not '-':
             sounding_notes = new_notes
 
-        print(show_list_spatially(new_notes, sounding_notes, offset=30))
+        if show_notes:
+            print(show_list_spatially(new_notes, sounding_notes, offset=30))
 
         # sleep
         yield ('sleep', dur)
@@ -882,7 +896,7 @@ def eventsg(ns, dur=.2, vel=VELOCITY, oct=4, sounding_notes = None, leave_soundi
     # if we actually played any notes...
     if not first_time and not leave_sounding:
         # note off's for last note
-        for this_note_off in notes_off_g(sounding_notes, n, oct):
+        for this_note_off in notes_off_g(sounding_notes, oct):
             yield this_note_off
 
 
@@ -1024,6 +1038,19 @@ chordtxt = {
     'Bb major': 'hDF',
     'B major': 'bSM',
 
+    'C7': 'cegh',
+    'Db7': 'rfob',
+    'D7': 'dmaC',
+    'Eb7': 'sghR',
+    'E7': 'eobD',
+    'F7': 'faCS',
+    'F#7': 'mhRE',
+    'G7': 'gbDF',
+    'Ab7': 'oCSM',
+    'A7': 'aREG',
+    'Bb7': 'hDFO',
+    'B7': 'bSMA',
+
     'C major 7': 'cegb',
     'Db major 7': 'rfoC',
     'D major 7': 'dmaR',
@@ -1115,6 +1142,69 @@ chordtxt = {
     'Bb augmented': 'hDM',
     'B augmented': 'bSG',
 }
+
+chord_progressions = [
+    ['C major', 'F major', 'G major', 'C major'],
+    ['F major', 'F major', 'C major', 'C major', 'Bb major', 'Bb major', 'F major', 'F major'],
+    ['C minor', 'C minor', 'Bb major', 'Bb major', 'Eb major', 'Eb major', 'C minor', 'C minor'],
+    # All of Me
+    dbl(['C major', 'E7', 'A7', 'D minor',
+    'E7', 'A minor', 'D7', 'G7',
+    'C major', 'E7', 'A7', 'D minor'])
+        + ['F major', 'F minor', 'E minor 7', 'A7',
+        'D minor 7', 'G7', 'C major', 'C major'],
+]
+
+all_of_me = chord_progressions[3]
+
+def coinflip():
+    return random.randint(1,2) == 1
+
+def play_all_of_me():
+    playe(all_of_me_e())
+
+def all_of_me_e():
+    if coinflip():
+        return eventsg_cp(all_of_me, pattern=[0,2,1,2]*2, dur=swung_dur(.4,.2).next)
+    else:
+        return eventsg_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),(1,0),(2,0),(0,1)])
+
+def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
+    playe(
+        eventsg_cp(chord_progression, times=times, pattern=pattern, oct_pattern=oct_pattern, dur=dur)
+    )
+
+def expand_chord(chord, pattern=None, oct_pattern=None):
+    'returns numeric pitches of chord, optionally applying a pattern or oct_pattern'
+    if pattern:
+        return strn2pitches(apply_pattern(pattern, chordtxt[chord]))
+    elif oct_pattern:
+        cp_pitches = strn2pitches(chordtxt[chord])
+        return apply_oct_pattern(oct_pattern, cp_pitches)
+    else:
+        return strn2pitches(chordtxt[chord])
+
+def eventsg_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
+    for i in range(times):
+        for chord in chord_progression:
+            pitches = expand_chord(chord, pattern=pattern, oct_pattern=oct_pattern)
+            for event in eventsg(pitches, dur=dur):
+                yield event
+
+def apply_pattern(idx_pattern, bank):
+    return (bank[i] for i in idx_pattern)
+
+def apply_oct_pattern(idx_oct_pattern, bank):
+    'this time the pattern has (idx,oct) tuples'
+    "can't be used directly on strings, need pitch numbers"
+
+    bank = list(bank); "in case it's a generator"
+    def get1pitch(idx,oct):
+        if isinstance(idx,int):
+            return bank[idx] + 12*oct
+        else: # collection of idx's
+            return [get1pitch(i,oct) for i in idx]
+    return (get1pitch(i,oct) for i,oct in idx_oct_pattern)
 
 def is_pure_chord(pitches, root, chord_quality):
     chord_pitches = up(chords[chord_quality], root)
