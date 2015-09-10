@@ -835,11 +835,12 @@ iter_type = type(iter([0]))
 def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_sounding = False, show_notes = True):
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
-    if dur is None: dur = DURATION
+    '#note: this works pretty well! needs some cleanup'
 
-    #note: this works pretty well! needs some cleanup
-        #todo there's an issue where if one voice runs out of notes before the other
-        # it will leave the last note hanging.  None should stop the voice
+    "#todo there's an issue where if one voice runs out of notes before the other\
+    it will leave the last note hanging.  Passing 'None' should stop the voice"
+
+    if dur is None: dur = DURATION
 
     first_time = True
     for n in ns:
@@ -1092,6 +1093,32 @@ chordtxt = {
     'Bb minor 7': 'hRFO',
     'B minor 7': 'bDMA',
 
+    'C minor 6': 'csga',
+    'Db minor 6': 'reoh',
+    'D minor 6': 'dfab',
+    'Eb minor 6': 'smhC',
+    'E minor 6': 'egbR',
+    'F minor 6': 'foCD',
+    'F# minor 6': 'maRS',
+    'G minor 6': 'ghDE',
+    'Ab minor 6': 'obSF',
+    'A minor 6': 'aCEM',
+    'Bb minor 6': 'hRFG',
+    'B minor 6': 'bDMO',
+
+    'C minor major 7': 'csgb',
+    'Db minor major 7': 'reoC',
+    'D minor major 7': 'dfaR',
+    'Eb minor major 7': 'smhD',
+    'E minor major 7': 'egbS',
+    'F minor major 7': 'foCE',
+    'F# minor major 7': 'maRF',
+    'G minor major 7': 'ghDM',
+    'Ab minor major 7': 'obSG',
+    'A minor major 7': 'aCEO',
+    'Bb minor major 7': 'hRFA',
+    'B minor major 7': 'bDMH',
+
     'C half-diminished 7': 'csmh',
     'Db half-diminished 7': 'regb',
     'D half-diminished 7': 'dfoC',
@@ -1155,9 +1182,15 @@ chord_progressions = [
     'C major', 'E7', 'A7', 'D minor'])
         + ['F major', 'F minor', 'E minor 7', 'A7',
         'D minor 7', 'G7', 'C major', 'C major'],
+    # My Funny Valentine
+    [
+    'C minor', 'C minor major 7', 'C minor 7', 'C minor 6',
+    'Ab major 7', 'F minor 7', 'D half-diminished 7', 'G7'
+    ],
 ]
 
 all_of_me = chord_progressions[3]
+my_funny_valentine = chord_progressions[4]
 
 def coinflip():
     return random.randint(1,2) == 1
@@ -1170,6 +1203,12 @@ def all_of_me_e():
         return eventsg_cp(all_of_me, pattern=[0,2,1,2]*2, dur=swung_dur(.4,.2).next)
     else:
         return eventsg_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),([0,1],0),(2,0),(0,1)])
+
+def play_valentine():
+    playe(valentine_e())
+
+def valentine_e():
+    return eventsg_cp(my_funny_valentine, pattern=[0,1,2,3]*2, dur=swung_dur(.4,.2).next)
 
 def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
     playe(
@@ -1196,6 +1235,7 @@ def eventsg_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=N
 def apply_pattern(idx_pattern, bank):
     return (bank[i] for i in idx_pattern)
 
+#todo extend pattern across octaves with a generator so it doesn't matter if some chords don't have enough notes in chord
 def apply_oct_pattern(idx_oct_pattern, bank):
     'this time the pattern has (idx,oct) tuples'
     "can't be used directly on strings, need pitch numbers"
