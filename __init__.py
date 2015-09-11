@@ -152,9 +152,16 @@ def midi_note_off(pitch):
     control = [0x80, pitch, 0]
     midiout.send_message(control)
 
+def midi_panic():
+    for i in range(127):
+        note_off(i) 
+
 def midi_program_change(instrument_no):
     control = [0xc0, instrument_no]
     midiout.send_message(control)
+
+panic = midi_panic
+prog_chg = midi_program_change
 
 
 'higher level functionality - octave offset & some rest / note holding logic'
@@ -170,6 +177,12 @@ def note_off(n, oct=4):
     pitch = up(n, oct*12)
     if not is_silent(pitch): # if the pitch was silent, no need to silence
         midi_note_off(pitch)
+
+def rand_inst():
+    instrument = random.randint(0,127)
+    midi_program_change(instrument)
+    return instrument
+
 
 
 def note(n, dur=.2, vel=VELOCITY, oct=4):
@@ -190,7 +203,9 @@ def chord_on(ns, vel=VELOCITY, oct=4):
     for n in ns: note_on(n, vel, oct)
 
 def chord_off(ns, oct=4):
-    for n in ns: note_off(n, oct)
+    if ns:
+        for n in ns:
+            note_off(n, oct)
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
@@ -327,7 +342,7 @@ def scale_triads(scale, num_octs=2, omit_last=False):
     for i in descending_range:
         yield scale_triad(scale, i)
 
-def play_scales_in_triads(num_octs=2, dur=.2, leave_sounding=True):
+def play_scales_triads(num_octs=2, dur=.2, leave_sounding=True):
     my_scales = choose_some_scales()
     for i,scale_type in enumerate(my_scales):
         print('triads from the ' + scale_type + ' scale')
@@ -1341,27 +1356,37 @@ def detect_pure_chord_strn(mus_strn):
 
 
 def random_groovy_chord():
-	chord = random.choice(('G minor 7', 'A minor 7', 'Bb major 7'))
-	return strn2pitches(chordtxt[chord])
+    chord = random.choice(('G minor 7', 'A minor 7', 'Bb major 7'))
+    return strn2pitches(chordtxt[chord])
 
 def play_random_groovy_chord():
-	chord_on(random_groovy_chord())
+    chord_on(random_groovy_chord())
 
 def random_groovy_chords():
-	while True:
-		chord = random_groovy_chord()
-		times = random.randint(2,12)
-		for n in range(times):
-			yield chord
-			dur = random.randint(2,12)
-			sleep(dur)
+    while True:
+        chord = list(random_groovy_chord()); 'solidify generator'
+        times = 1 #random.randint(1,2)
+        for n in range(times):
+            yield chord
+            dur = random.randint(2,6)
+            sleep(dur)
 
 def play_random_groovy_chords():
-	for chord in random_groovy_chords():
-		chord_on(chord)
+    try:
+        last_chord = None
+        for chord in random_groovy_chords():
+            chord = list(chord); 'solidify generator'
+            chord_off(last_chord)
+            chord_on(chord)
+            last_chord = chord
+    except KeyboardInterrupt:
+        chord_off(last_chord)
+        
+
+rgc = play_random_groovy_chords
 
 def play_something():
-    r = random.randint(0,4)
+    r = random.randint(0,6)
     if r == 0:
         play_bach4()
     elif r == 1:
@@ -1384,6 +1409,8 @@ def play_something():
             play_chorale(dur=swung_dur(.4,.2).next)
     elif r == 5:
         play_strn(when_today_becomes_tomorrow)
+    elif r == 6:
+        play_random_groovy_chords()
 
 if __name__ == '__main__':
     if random.randint(0,1)==0:
