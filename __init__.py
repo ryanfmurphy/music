@@ -30,9 +30,6 @@ and start it up via e.g.:
 Let's make some noise!
 '''
 
-#First we include some needed libraries:
-
-#import pygame.midi
 import rtmidi
 import itertools, collections
 import time
@@ -40,12 +37,10 @@ import random
 from fractions import Fraction
 from util2 import lispy_funcall, is_listy
 import signal, sys
+from pprint import pprint as pp
 
 
-# midi.close() on KeyboardInterrupt
 def close_midi_handler(signal, frame):
-    #global midi
-    #midi.close()
     global midiout
     del midiout
     sys.exit(0)
@@ -132,8 +127,6 @@ def midi_init():
 
 midi_init()
 
-#{
-
 def is_special_val(pitch):
     return pitch in (None,'','-',',',"'")
 
@@ -148,10 +141,8 @@ def is_silent(pitch):
 def do_hold_note(new_note): # decide whether to hold existing note
     return new_note in [None,'-',',',"'"]
 
-'''
-I created some low-level wrappers that turn a note
-on or off using midi.note_on and midi.note_off.
-'''
+
+'''low-level midi message functionality'''
 
 def midi_note_on(pitch, vel):
     control = [0x90, pitch, vel]
@@ -165,13 +156,8 @@ def midi_program_change(instrument_no):
     control = [0xc0, instrument_no]
     midiout.send_message(control)
 
-'''
-Now adding another layer that's a little more high-level.
 
-The main changes I'm adding are just to shift the
-pitches by a few octaves by default, and to tolerate
-the value None (just don't do anything).
-'''
+'higher level functionality - octave offset & some rest / note holding logic'
 
 def note_on(n, vel=VELOCITY, oct=4):
     '''print 'note_on', n, vel, oct'''      # -vv
@@ -185,6 +171,7 @@ def note_off(n, oct=4):
     if not is_silent(pitch): # if the pitch was silent, no need to silence
         midi_note_off(pitch)
 
+
 def note(n, dur=.2, vel=VELOCITY, oct=4):
     '''
     turn a note on, wait a specified duration, and then
@@ -194,7 +181,7 @@ def note(n, dur=.2, vel=VELOCITY, oct=4):
     sleep(dur)
     note_off(n, oct)
 
-def notes(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False):
+def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False):
     if dur is None: dur = DURATION
     playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding))
 
@@ -246,8 +233,6 @@ def notec_off(item, oct=4):
     else:
         note_off(item, oct)
 
-#}{
-
 '''
 Fun with Music Theory: adding Scales
 ------------------------------------
@@ -284,61 +269,101 @@ def extend_scales(num_octs=4):
         scale += [n + 12*oct for oct in range(1,num_octs) for n in scale]
         scale += [scale[0]+12*num_octs]
 
-'''
-Now I wanted a function that would play up and down
-all the scales, while printing out which ones they were:
-'''
-def play_scales(dur=.2):
-    my_scales = random.sample(scales.keys(), 2)
-    for scale_type in my_scales:
-        scale = scales[scale_type]
+def get_scale(scale_type_or_scale):
+    if isinstance(scale_type_or_scale, str):
+        return scales[scale_type_or_scale]
+    else:
+        return scale_type_or_scale
+
+
+'scale ascending and descending'
+
+def eventsg_scale(scale, dur=DURATION, omit_last=False, leave_sounding=False):
+    'scale can be a scale_type or a scale itself'
+    scale = get_scale(scale)
+    'ascending'
+    for e in eventsg(scale, dur=dur, leave_sounding=leave_sounding):
+        yield e
+    'descending'
+    if omit_last:
+        desc_scale = scale[-2:0:-1]
+    else:
+        desc_scale = scale[-2::-1]
+    for e in eventsg(desc_scale, dur=dur, leave_sounding=leave_sounding):
+        yield e
+
+def play_scale(scale, dur=DURATION, omit_last=False):
+    playe(
+        eventsg_scale(scale, dur, omit_last)
+    )
+
+def choose_some_scales():
+    return random.sample(scales.keys(), 2)
+
+def play_scales(dur=DURATION):
+    my_scales = choose_some_scales()
+    for i,scale_type in enumerate(my_scales):
         print(scale_type)
-        for n in scale: note(n,dur=dur)            # ascending
-        for n in scale[-2:0:-1] : note(n,dur=dur)  # descending
-    note(scale[0], dur=2)
+        is_last = True if i == len(my_scales) - 1 else False
+        omit_last = False if is_last else True
+        play_scale(scale_type, omit_last=omit_last)
 
 triad_scale_offsets = (0,2,4)
 
 def scale_triad(scale, offs, invert=False):
-    #todo #fixme - currently we 
     pat = triad_scale_offsets
     if invert: pat = tuple(-i for i in pat)
     return tuple(scale[offs + i] for i in pat)
 
-def play_scale_triads(num_octs=2, dur=.2):
+def scale_triads(scale, num_octs=2, omit_last=False):
+    scale = get_scale(scale)
+    'ascending'
+    ascending_range = range(7*num_octs + 1)
+    for i in ascending_range:
+        yield scale_triad(scale, i)
+    'descending'
+    if omit_last: descending_range = range(7*num_octs - 1, 0, -1)
+    else:         descending_range = range(7*num_octs - 1, -1, -1)
+    for i in descending_range:
+        yield scale_triad(scale, i)
+
+def play_scales_in_triads(num_octs=2, dur=.2, leave_sounding=True):
+    my_scales = choose_some_scales()
+    for i,scale_type in enumerate(my_scales):
+        print('triads from the ' + scale_type + ' scale')
+        is_last = True if i == len(my_scales) - 1 else False
+        omit_last = False if is_last else True
+        play(
+            scale_triads(scale_type, num_octs, omit_last=omit_last),
+            leave_sounding=leave_sounding
+        )
+
+def scale_broken_triads(scale, num_octs=1, offs=7, dur=DURATION):
+    scale = get_scale(scale)
+    # ascending
+    for i in range(7*num_octs):
+        for j in scale_triad(scale, i+offs):
+            yield j
+    # descending
+    for i in range(7*num_octs, -1, -1):
+        for j in reversed(scale_triad(scale, i+offs)):
+            yield j
+
+def play_scales_broken_triads(num_octs=1, offs=7, dur=DURATION):
     for scale_type,scale in scales.items():
         print('triads from the ' + scale_type + ' scale')
-        # ascending
-        for i in range(7*num_octs + 1):
-            chord(scale_triad(scale, i), dur=dur)
-        # descending
-        for i in range(7*num_octs - 1, 0, -1):
-            chord(scale_triad(scale, i), dur=dur)
+        play(
+            scale_broken_triads(scale_type, num_octs=num_octs, offs=offs, dur=dur),
+            leave_sounding=False
+        )
     chord(scale_triad(scale, 0), dur=2)
 
-def play_scale_triads_broken(num_octs=1, offs=7, dur=.2):
-    for scale_type,scale in scales.items():
-        print('triads from the ' + scale_type + ' scale')
-        # ascending
-        for i in range(7*num_octs):
-            notes(scale_triad(scale, i+offs), dur=dur)
-        # descending
-        for i in range(7*num_octs, -1, -1):
-            notes(reversed(scale_triad(scale, i+offs)), dur=dur)
-    chord(scale_triad(scale, 0), dur=2)
-
-try:
+def init_music_theory():
     extend_scales()
-    #play_scales()
-    #play_scale_triads()
-    #play_scale_triads_broken()
-except KeyboardInterrupt:
-    pass
-finally:
-    pass
 
-#}{
-#-- Tue Feb 24 2015 --
+init_music_theory()
+
+'-- Tue Feb 24 2015 --'
 
 def up(pitch,amt): # transpose up
     if is_special_val(pitch): return pitch
@@ -353,16 +378,6 @@ def get_dur(dur):
         return dur()
     else:
         return dur
-
-#deprecated, used notes()
-'''
-def play(notes_gen, dur=None):
-    # notes_gen must be a generator that actually plays the notes with notec_on, notec_off etc
-    for n in notes_gen:
-        sleep(dur)
-'''
-
-play = notes
 
 def swung_dur(long_dur=.4, short_dur=.2): #-- 06-01-15
     return icycle((long_dur, short_dur))
@@ -453,7 +468,7 @@ def sweet_groove():
 #todo allow a Case Octave Shift to happen after a ' ': e.g. 'm-g-a-b-e-B-c-d---  B-emg-d-s-emgab---', the B should go Down
 
 
-#-- Mon Apr 6 2015 --
+'-- Mon Apr 6 2015 --'
 
 def two_hands(parts):
     return izip(parts['rh'],parts['lh'])
@@ -584,7 +599,7 @@ def play_piece(piece):
 # e.g. play_piece(bach9bars) - #todo #fixme - this seems to note hold out '-' notes
 
 #}{
-#-- Sun May 3 2015 --
+'-- Sun May 3 2015 --'
 
 note_name_str = 'crdsefmgoahbCRDSEFMGOAHB'
 note_names = {k:v for k,v in enumerate(note_name_str)}
@@ -608,7 +623,7 @@ with open(bach4,'r') as fh:
 '''
 
 
-#-- Sun May 31 2015 --
+'-- Sun May 31 2015 --'
 
 def note_diff(note1,note2):
     #print 'note_diff({note1},{note2})'.format(note1=note1,note2=note2)
@@ -725,14 +740,14 @@ def strn2pitches(strn):
     return close_big_intervals(strn2numbers(strn))
 
 def play_strn(strn, dur=DURATION, leave_sounding=False):
-    notes(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
+    play(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
 
 
 def strn_note_on(ch):
     pitch = note_numbers[ch]
     note_on(pitch)    
 
-#-- Mon Jun 1 2015 --
+'-- Mon Jun 1 2015 --'
 
 def wind_chimes():
     while True:
@@ -762,7 +777,7 @@ def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
     combined = izip(*parts)
-    notes(combined, dur=dur, vel=vel)
+    play(combined, dur=dur, vel=vel)
 
 def play2hands(strns, octaves=(1,0), dur=None):
     play_strns(strns, octaves=octaves, dur=dur)
@@ -912,7 +927,7 @@ def playe(events):
         lispy_funcall(e, env=globals())
 
 #}
-#-- Fri Jun 5 2015 --
+'-- Fri Jun 5 2015 --'
 
 # whoa, generators tripping me out!
 # trying to figure out how sending and receiving works
@@ -945,7 +960,7 @@ def playe(events):
 
 
 
-#-- Mon Jun 8 2015 --
+'-- Mon Jun 8 2015 --'
 
 chorales = {
     'bach': {
@@ -997,7 +1012,7 @@ chorales = {
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     global chorales
 
-    # choose a chorale if not provided
+    'choose a chorale if not provided'
     if composer is None:
         unique_composers = chorales.keys()
         weighted_composers = []
@@ -1009,7 +1024,7 @@ def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
         nums = chorales[composer].keys()
         num = random.choice(nums)
 
-    # setup
+    'setup'
     chorale = chorales[composer][num]
     octaves = (1,1,0,0)
     if composer == 'bach':
@@ -1018,17 +1033,15 @@ def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     elif composer == 'evan':
         if num == 0: octaves = (2,1,0,0)
 
-    # play it
+    'play it'
     play_strns(chorale, octaves = octaves, dur=dur, vel=vel)
 
 def test():
     play([0,2,4]) 
 
-#-- Sat Jun 13 2015 --
+'-- Sat Jun 13 2015 --'
 
-# got ' and , to work!
-
-#play_bach4()
+"#done - got ' and , to work!"
 
 chordtxt = {
     'C major': 'ceg',
@@ -1354,7 +1367,13 @@ def play_something():
     elif r == 1:
         sweet_groove()
     elif r == 2:
-        play_scale_triads_broken()
+        r2 = random.randint(0,2)
+        if r2 == 0:
+            play_scales()
+        elif r2 == 1:
+            play_scales_triads()
+        elif r2 == 2:
+            play_scales_broken_triads()
     elif r == 3:
         play_nostalgic_arp_melody()
     elif r == 4:
