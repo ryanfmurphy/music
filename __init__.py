@@ -160,7 +160,10 @@ def midi_note_on(pitch, vel):
 def midi_note_off(pitch):
     control = [0x80, pitch, 0]
     midiout.send_message(control)
-    
+
+def midi_program_change(instrument_no):
+    control = [0xc0, instrument_no]
+    midiout.send_message(control)
 
 '''
 Now adding another layer that's a little more high-level.
@@ -1323,6 +1326,26 @@ def detect_pure_chord_strn(mus_strn):
         root = note_names[root]
         return root, chord_type
 
+
+def random_groovy_chord():
+	chord = random.choice(('G minor 7', 'A minor 7', 'Bb major 7'))
+	return strn2pitches(chordtxt[chord])
+
+def play_random_groovy_chord():
+	chord_on(random_groovy_chord())
+
+def random_groovy_chords():
+	while True:
+		chord = random_groovy_chord()
+		times = random.randint(2,12)
+		for n in range(times):
+			yield chord
+			dur = random.randint(2,12)
+			sleep(dur)
+
+def play_random_groovy_chords():
+	for chord in random_groovy_chords():
+		chord_on(chord)
 
 def play_something():
     r = random.randint(0,4)
