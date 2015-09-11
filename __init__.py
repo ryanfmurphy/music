@@ -144,20 +144,20 @@ def do_hold_note(new_note): # decide whether to hold existing note
 
 '''low-level midi message functionality'''
 
-def midi_note_on(pitch, vel):
-    control = [0x90, pitch, vel]
+def midi_note_on(pitch, vel, channel=0):
+    control = [0x90 + channel, pitch, vel]
     midiout.send_message(control)
 
-def midi_note_off(pitch):
-    control = [0x80, pitch, 0]
+def midi_note_off(pitch, channel=0):
+    control = [0x80 + channel, pitch, 0]
     midiout.send_message(control)
 
 def midi_panic():
     for i in range(127):
         note_off(i) 
 
-def midi_program_change(instrument_no):
-    control = [0xc0, instrument_no]
+def midi_program_change(instrument_no, channel=0):
+    control = [0xc0 + channel, instrument_no]
     midiout.send_message(control)
 
 panic = midi_panic
@@ -166,33 +166,23 @@ prog_chg = midi_program_change
 
 'higher level functionality - octave offset & some rest / note holding logic'
 
-def note_on(n, vel=VELOCITY, oct=4):
+def note_on(n, vel=VELOCITY, oct=4, channel=0):
     '''print 'note_on', n, vel, oct'''      # -vv
     '''print n,'''                          # -v
     pitch = up(n, oct*12)
     if not is_silent(pitch):
-        midi_note_on(pitch, vel)
+        midi_note_on(pitch, vel, channel=channel)
 
-def note_off(n, oct=4):
+def note_off(n, oct=4, channel=0):
     pitch = up(n, oct*12)
     if not is_silent(pitch): # if the pitch was silent, no need to silence
-        midi_note_off(pitch)
+        midi_note_off(pitch, channel=channel)
 
 def rand_inst():
     instrument = random.randint(0,127)
     midi_program_change(instrument)
     return instrument
 
-
-
-def note(n, dur=.2, vel=VELOCITY, oct=4):
-    '''
-    turn a note on, wait a specified duration, and then
-    turn the note off:
-    '''
-    note_on(n, vel, oct)
-    sleep(dur)
-    note_off(n, oct)
 
 def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False):
     if dur is None: dur = DURATION
@@ -1207,6 +1197,7 @@ chord_progressions = [
     ['C major', 'F major', 'G major', 'C major'],
     ['F major', 'F major', 'C major', 'C major', 'Bb major', 'Bb major', 'F major', 'F major'],
     ['C minor', 'C minor', 'Bb major', 'Bb major', 'Eb major', 'Eb major', 'C minor', 'C minor'],
+    ['G minor 7', 'A minor 7', 'Bb major 7'],
     # All of Me
     dbl(['C major', 'E7', 'A7', 'D minor',
     'E7', 'A minor', 'D7', 'G7',
@@ -1355,26 +1346,35 @@ def detect_pure_chord_strn(mus_strn):
         return root, chord_type
 
 
-def random_groovy_chord():
-    chord = random.choice(('G minor 7', 'A minor 7', 'Bb major 7'))
+def random_groovy_chord(mode=None):
+    if mode is None: mode = random.randint(0,2)
+    if mode == 0:
+        chords = ('G minor 7', 'A minor 7', 'Bb major 7'); 'a groovy classic option'
+    elif mode == 1:
+        chords = ('G minor 7', 'A minor 7', 'Bb major 7', 'F major 7', 'Eb major 7', 'D minor 7')
+    elif mode == 2:
+        chords = chordtxt.keys(); 'all chords'
+    else:
+        raise ValueError('mode {mode} out of range'.format(mode=mode))
+    chord = random.choice(chords)
     return strn2pitches(chordtxt[chord])
 
-def play_random_groovy_chord():
-    chord_on(random_groovy_chord())
+def play_random_groovy_chord(modo=False):
+    chord_on(random_groovy_chord(modo))
 
-def random_groovy_chords():
+def random_groovy_chords(mode=None):
     while True:
-        chord = list(random_groovy_chord()); 'solidify generator'
+        chord = list(random_groovy_chord(mode)); 'solidify generator'
         times = 1 #random.randint(1,2)
         for n in range(times):
             yield chord
             dur = random.randint(2,6)
             sleep(dur)
 
-def play_random_groovy_chords():
+def play_random_groovy_chords(mode=None):
     try:
         last_chord = None
-        for chord in random_groovy_chords():
+        for chord in random_groovy_chords(mode):
             chord = list(chord); 'solidify generator'
             chord_off(last_chord)
             chord_on(chord)
@@ -1384,6 +1384,9 @@ def play_random_groovy_chords():
         
 
 rgc = play_random_groovy_chords
+def rgci():
+    rand_inst()
+    rgc()
 
 def play_something():
     r = random.randint(0,6)
@@ -1411,6 +1414,33 @@ def play_something():
         play_strn(when_today_becomes_tomorrow)
     elif r == 6:
         play_random_groovy_chords()
+
+
+
+def play_drums(dur=DURATION):
+    kick, snare, hh = 36, 38, 42
+    while True:
+        midi_note_on(kick, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(hh, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(snare, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(hh, 100, channel=9)
+        sleep(dur)
+        midi_note_on(kick, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(kick, 100, channel=9)
+        sleep(dur)
+        midi_note_on(kick, 100, channel=9)
+        midi_note_on(hh, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(snare, 100, channel=9)
+        sleep(dur*2)
+        midi_note_on(hh, 100, channel=9)
+        sleep(dur*2)
+
+
 
 if __name__ == '__main__':
     if random.randint(0,1)==0:
