@@ -15,6 +15,7 @@ from fractions import Fraction
 import midi
 try:                import my_db
 except ImportError: my_db = None
+#todo catch psycopg2.OperationalError
 
 
 class Beat(object):

@@ -109,6 +109,8 @@ def verbose_sleep_6_8(dur):
 '''
 #todo #fixme - get rid of all the adhoc '-' comparisons, try to use do_hold_note
 #todo #fixme - currently ',' and "'" will stop the last note, let it hold
+
+#todo do some stuff with the Russian Doll chord concept - C -> Am -> F -> Dm etc
 '''
 
 def midi_init():
@@ -144,20 +146,20 @@ def do_hold_note(new_note): # decide whether to hold existing note
 
 '''low-level midi message functionality'''
 
-def midi_note_on(pitch, vel, channel=0):
-    control = [0x90 + channel, pitch, vel]
+def midi_note_on(pitch, vel, chan=0):
+    control = [0x90 + chan, pitch, vel]
     midiout.send_message(control)
 
-def midi_note_off(pitch, channel=0):
-    control = [0x80 + channel, pitch, 0]
+def midi_note_off(pitch, chan=0):
+    control = [0x80 + chan, pitch, 0]
     midiout.send_message(control)
 
 def midi_panic():
     for i in range(127):
-        note_off(i) 
+        midi_note_off(i) 
 
-def midi_program_change(instrument_no, channel=0):
-    control = [0xc0 + channel, instrument_no]
+def midi_program_change(instrument_no, chan=0):
+    control = [0xc0 + chan, instrument_no]
     midiout.send_message(control)
 
 panic = midi_panic
@@ -166,36 +168,36 @@ prog_chg = midi_program_change
 
 'higher level functionality - octave offset & some rest / note holding logic'
 
-def note_on(n, vel=VELOCITY, oct=4, channel=0):
+def note_on(n, vel=VELOCITY, oct=4, chan=0):
     '''print 'note_on', n, vel, oct'''      # -vv
     '''print n,'''                          # -v
     pitch = up(n, oct*12)
     if not is_silent(pitch):
-        midi_note_on(pitch, vel, channel=channel)
+        midi_note_on(pitch, vel, chan=chan)
 
-def note_off(n, oct=4, channel=0):
+def note_off(n, oct=4, chan=0):
     pitch = up(n, oct*12)
     if not is_silent(pitch): # if the pitch was silent, no need to silence
-        midi_note_off(pitch, channel=channel)
+        midi_note_off(pitch, chan=chan)
 
-def rand_inst():
+def rand_inst(chan=0):
     instrument = random.randint(0,127)
-    midi_program_change(instrument)
+    midi_program_change(instrument, chan=chan)
     return instrument
 
 
-def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False):
+def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
     if dur is None: dur = DURATION
-    playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding))
+    playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding, chan=chan))
 
 
-def chord_on(ns, vel=VELOCITY, oct=4):
-    for n in ns: note_on(n, vel, oct)
+def chord_on(ns, vel=VELOCITY, oct=4, chan=0):
+    for n in ns: note_on(n, vel, oct, chan=chan)
 
-def chord_off(ns, oct=4):
+def chord_off(ns, oct=4, chan=0):
     if ns:
         for n in ns:
-            note_off(n, oct)
+            note_off(n, oct, chan=chan)
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
@@ -211,20 +213,20 @@ provided a whole list/iterable, it would put all the
 notes on as a chord:
 '''
 
-def notec_on(item, vel=VELOCITY, oct=4):
+def notec_on(item, vel=VELOCITY, oct=4, chan=0):
     if item in (None,''): return
     if isinstance(item,list) or isinstance(item,tuple):
-        chord_on(item, vel, oct)
+        chord_on(item, vel, oct, chan=chan)
     else:
-        note_on(item, vel, oct)
+        note_on(item, vel, oct, chan=chan)
 
-def notes_on_g(item, vel=VELOCITY, oct=4):
+def notes_on_g(item, vel=VELOCITY, oct=4, chan=0):
     if item in (None,''): yield None
     if isinstance(item,list) or isinstance(item,tuple):
         for note in item:
-            yield ('note_on', note, vel, oct)
+            yield ('note_on', note, vel, oct, chan)
     else:
-        yield ('note_on', item, vel, oct)
+        yield ('note_on', item, vel, oct, chan)
 
 '''
 And similarly, a `notec_off` function
@@ -603,12 +605,69 @@ def play_piece(piece):
 
 # e.g. play_piece(bach9bars) - #todo #fixme - this seems to note hold out '-' notes
 
-#}{
 '-- Sun May 3 2015 --'
 
 note_name_str = 'crdsefmgoahbCRDSEFMGOAHB'
 note_names = {k:v for k,v in enumerate(note_name_str)}
-note_numbers = {v:k for k,v in note_names.items()}
+
+note_numbers = {
+    'c':0,
+    'i':0,
+    'j':1,
+    'r':1,
+    'd':2,
+    'y':2,
+    'z':2,
+    'k':3,
+    's':3,
+    'e':4,
+    't':4,
+    'f':5,
+    'l':5,
+    'm':6,
+    'u':6,
+    'g':7,
+    'v':7,
+    'o':8,
+    'n':8,
+    'a':9,
+    'w':9,
+    'x':9,
+    'h':10,
+    'p':10,
+    'b':11,
+    'q':11,
+    'C':12,
+    'I':12,
+    'J':13,
+    'R':14,
+    'D':14,
+    'D':14,
+    'Y':14,
+    'Z':14,
+    'S':15,
+    'K':15,
+    'E':16,
+    'T':16,
+    'F':17,
+    'L':17,
+    'M':18,
+    'U':18,
+    'G':19,
+    'V':19,
+    'O':20,
+    'N':20,
+    'A':21,
+    'W':21,
+    'X':21,
+    'H':22,
+    'P':22,
+    'Q':23,
+    'B':23,
+}
+
+#note_numbers = {v:k for k,v in note_names.items()}
+#note_names = {v:k for k,v in note_numbers.items()}
 
 note_names[None] = ' '
 note_numbers[' '] = None
@@ -622,10 +681,11 @@ note_numbers[','] = ','
 note_names["'"] = "'" # silently go up an octave
 note_numbers["'"] = "'"
 
-'''
-with open(bach4,'r') as fh:
-    bach4str = fh.read()
-'''
+def note_name(pitch_num):
+    if pitch_num is None:
+        return ' '
+    else:
+        return note_names[pitch_num % 24]
 
 
 '-- Sun May 31 2015 --'
@@ -744,8 +804,13 @@ def strn2numbers(strn):
 def strn2pitches(strn):
     return close_big_intervals(strn2numbers(strn))
 
+def eventsg_strn(strn, dur=DURATION, leave_sounding=False):
+    return eventsg(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
+
+estrn = eventsg_strn
+
 def play_strn(strn, dur=DURATION, leave_sounding=False):
-    play(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
+    playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding))
 
 
 def strn_note_on(ch):
@@ -776,13 +841,17 @@ bach6strn = [
     "e---m---o---a---b---R---S---E-S-R-b-E---_---------e---s---d---r---B---A---O---M---OAO-BAB-OMO-ESE---r---e---m---h---R-,-S---B---s---e---o---b-,-R---r---e---m---o---h---b---e---o---m-R-h-R-e-R-s---e---m---B-bhb-mem-srs-mem-srs-BHB-----,-b-'-"*2,
 ]
 
-def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
+def eventsg_strns(strns, octaves=None, dur=None, vel=VELOCITY):
     parts = [strn2pitches(s) for s in strns]
     if octaves: # transpose as needed
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
     combined = izip(*parts)
-    play(combined, dur=dur, vel=vel)
+    for e in eventsg(combined, dur=dur, vel=vel):
+        yield e
+
+def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
+    playe(eventsg_strns(strns, octaves=octaves, dur=dur, vel=vel))
 
 def play2hands(strns, octaves=(1,0), dur=None):
     play_strns(strns, octaves=octaves, dur=dur)
@@ -793,14 +862,15 @@ def play_bach4(octaves=(1,0), dur=None, vel=VELOCITY):
 def play_bach6(dur=None):
     play2hands(bach6strn, dur=dur)
 
-#}{
 
-# -- Wed Jun 3 2015 --
+'-- Wed Jun 3 2015 --'
 
-# look at the last_note or all the last_notes
-# as well as the current_note or all the current_notes
-# and decide which notes to turn off
-def notes_off_g(sounding_notes, oct, new_notes=None):
+'''
+look at the last_note or all the last_notes
+as well as the current_note or all the current_notes
+and decide which notes to turn off
+'''
+def notes_off_g(sounding_notes, oct, chan=0, new_notes=None):
     if isinstance(sounding_notes, collections.Iterable):
         for i,note in enumerate(sounding_notes):
             corresponding_new_note = None
@@ -828,14 +898,14 @@ def notes_off_g(sounding_notes, oct, new_notes=None):
     else: # single last note
         #if new_notes != '-':
         if do_hold_note(new_note): #test
-            yield ('note_off', sounding_notes, oct)
+            yield ('note_off', sounding_notes, oct, chan)
 
 
 def iterable(x):
     return isinstance(x, collections.Iterable)
 
 
-def show_list_spatially(positions, held_positions=None, offset=0):
+def show_list_spatially(positions, held_positions=None, offset=0, show_note_names=False):
     dim, undim = '\033[2m', '\033[0m'
     max_width = 80
     chars = [' '] * max_width
@@ -849,13 +919,19 @@ def show_list_spatially(positions, held_positions=None, offset=0):
         if isinstance(pos, int):
             adjusted_pos = pos + offset
             if 0 <= adjusted_pos < max_width:
-                chars[adjusted_pos] = '●'
+                if show_note_names:
+                    chars[adjusted_pos] = note_name(pos)
+                else:
+                    chars[adjusted_pos] = '●'
     strn = ''.join(chars)
     return strn
 
 iter_type = type(iter([0]))
 
-def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_sounding = False, show_notes = True):
+def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
+            sounding_notes = None, leave_sounding = False,
+            show_notes = True, show_note_names = True):
+
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
     '#note: this works pretty well! needs some cleanup'
@@ -878,7 +954,7 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
         #print "whereas new notes:", new_notes
         if not first_time:
             these_note_offs = []
-            for this_note_off in notes_off_g(sounding_notes, oct, new_notes):
+            for this_note_off in notes_off_g(sounding_notes, oct, chan, new_notes):
                 #print '  an off:',this_note_off
                 these_note_offs.append(this_note_off[1])
                 yield this_note_off
@@ -888,7 +964,7 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
         
         # note_on - #todo make a generator that does this one at a time instead of notec_on
         these_note_ons = []
-        for this_note_on in notes_on_g(new_notes, vel, oct):
+        for this_note_on in notes_on_g(new_notes, vel, oct, chan=chan):
             note = this_note_on[1]
             if note != '-':
                 these_note_ons.append(note)
@@ -913,7 +989,7 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
             sounding_notes = new_notes
 
         if show_notes:
-            print(show_list_spatially(new_notes, sounding_notes, offset=30))
+            print(show_list_spatially(new_notes, sounding_notes, offset=30, show_note_names=show_note_names))
 
         # sleep
         yield ('sleep', dur)
@@ -922,16 +998,20 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, sounding_notes = None, leave_
     # if we actually played any notes...
     if not first_time and not leave_sounding:
         # note off's for last note
-        for this_note_off in notes_off_g(sounding_notes, oct):
+        for this_note_off in notes_off_g(sounding_notes, oct, chan):
             yield this_note_off
 
 
-def playe(events):
-    for e in events:
-        #if len(e) and e[0] != 'sleep': print str(e)
-        lispy_funcall(e, env=globals())
+def playe(events, silence_on_abort = False):
+    if silence_on_abort:
+        try:
+            playe(events, silence_on_abort = False)
+        except KeyboardInterrupt:
+            panic()
+    else:
+        for e in events:
+            lispy_funcall(e, env=globals())
 
-#}
 '-- Fri Jun 5 2015 --'
 
 # whoa, generators tripping me out!
@@ -997,10 +1077,10 @@ chorales = {
 
     'ryan': {
         0: [
-            'e-f-g-fed-e-f--ge-----  g-C-bag-m-b---',
-            'c--Bc-A-A-c-c-B-c-----  e-a-e-e-b-b---      esemgeagmes--ee---  ',
-            'g-gfe-fga-f-d-g-g-----  g-e-c-b-A-G---',
-            'c-G-c---f-d-g-_-c-----  c-M---E-S-E-------E--MG-B-c-A-M-B-E---  ',
+            'e-f-g-fed-e-f--ge-----  g-C-bag-m-b-----  g--medcBA-c-B-A-G-----  e-f-g-fed-e-f--ge-----  g-C-bag-m-b-----  g--medcBA-c-B-A-O-----  ',
+            'c--Bc-A-d-c-c-B-c-----  e-a-e-e-a-g-----    esemgeagmes--ee-----  c--Bc-A-d-c-c-B-c-----  e-a-e-e-a-g-----    esemgeagmes--ee-----  ',
+            'g-gfe-fga-f-d-g-g-----  g-e-c-b-b-b-------b-----e-m-b---C-b-----  g-gfe-fga-f-d-g-g-----  g-e-c-b-b-b-------b-----e-m-b---C-b-----  ',
+            'c-G-c---f-d-g-_-c-----  c-M---E-S-E-------E--MG-B-c-A-M-B-E-----  c-G-c---f-d-g-_-c-----  c-M---E-S-E-------E--MG-B-c-A-M-B-E-----  ',
         ],
     },
 
@@ -1012,6 +1092,11 @@ chorales = {
             'c---e-g---e-d-g-_-c-----',
         ],
     }
+}
+
+'instruments I like (fluidR3 soundfont) ->'
+cool_instruments = {
+    68: 'woodwinds',
 }
 
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
@@ -1191,6 +1276,19 @@ chordtxt = {
     'A augmented': 'aRF',
     'Bb augmented': 'hDM',
     'B augmented': 'bSG',
+
+    'Csus': 'cfg',
+    'Dbsus': 'rmo',
+    'Dsus': 'dga',
+    'Ebsus': 'soh',
+    'Esus': 'eab',
+    'Fsus': 'fhC',
+    'F#sus': 'mbR',
+    'Gsus': 'gCD',
+    'Absus': 'oRS',
+    'Asus': 'aDE',
+    'Bbsus': 'hSF',
+    'Bsus': 'bEM',
 }
 
 chord_progressions = [
@@ -1293,10 +1391,7 @@ with open(home_dir + 'git1/songs/when today becomes tomorrow') as fh:
 
 
 
-# #todo chord detection (unfinished)
-# given a set of pitches, figure out if it is all notes of a certain chord
-c_maj_arp = [0,4,7,12,16,12,7,4,0]
-Eb_maj_arp = [3,7,10,15,19,15,10,7,3]
+'chord detection - given a set of pitches, figure out if it is all notes of a certain chord'
 
 def pitch_class(pitch):
     return pitch % 12
@@ -1346,17 +1441,23 @@ def detect_pure_chord_strn(mus_strn):
         return root, chord_type
 
 
+
+'create a improvized accompaniment of randomized chords'
+
 def random_groovy_chord(mode=None):
-    if mode is None: mode = random.randint(0,2)
+    if mode is None: mode = random.randint(0,3)
     if mode == 0:
         chords = ('G minor 7', 'A minor 7', 'Bb major 7'); 'a groovy classic option'
     elif mode == 1:
         chords = ('G minor 7', 'A minor 7', 'Bb major 7', 'F major 7', 'Eb major 7', 'D minor 7')
     elif mode == 2:
         chords = chordtxt.keys(); 'all chords'
+    elif mode == 3:
+        chords = ('F major 7', 'D7', 'Esus', 'G major 7', 'Ab major 7')
     else:
         raise ValueError('mode {mode} out of range'.format(mode=mode))
     chord = random.choice(chords)
+    print(chord)
     return strn2pitches(chordtxt[chord])
 
 def play_random_groovy_chord(modo=False):
@@ -1384,11 +1485,15 @@ def play_random_groovy_chords(mode=None):
         
 
 rgc = play_random_groovy_chords
-def rgci():
+def rgci(*args, **kwargs):
     rand_inst()
-    rgc()
+    rgc(*args, **kwargs)
+
+
+
 
 def play_something():
+    'play something - anything!'
     r = random.randint(0,6)
     if r == 0:
         play_bach4()
@@ -1417,30 +1522,85 @@ def play_something():
 
 
 
-def play_drums(dur=DURATION):
-    kick, snare, hh = 36, 38, 42
+'drum track'
+
+DRUM_CHAN = 9
+KICK, SNARE, HH = -12, -10, -6
+
+drum_beats = [
+    [KICK,KICK,(HH,KICK),KICK,SNARE,None,(HH,KICK),KICK,None,KICK,HH,KICK,SNARE,None,HH,None],
+    [KICK,None,HH,None,SNARE,None,HH,KICK,None,KICK,(KICK,HH),None,SNARE,None,HH,SNARE],
+]
+
+
+def play_drums(dur=DURATION, vel=VELOCITY):
+    beat = random.choice(drum_beats)
     while True:
-        midi_note_on(kick, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(hh, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(snare, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(hh, 100, channel=9)
-        sleep(dur)
-        midi_note_on(kick, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(kick, 100, channel=9)
-        sleep(dur)
-        midi_note_on(kick, 100, channel=9)
-        midi_note_on(hh, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(snare, 100, channel=9)
-        sleep(dur*2)
-        midi_note_on(hh, 100, channel=9)
-        sleep(dur*2)
+        playe(eventsg(beat, chan=DRUM_CHAN, vel=vel), silence_on_abort=False)
+    #drum_loop_events = icycle(eventsg(beat, chan=DRUM_CHAN, vel=vel))
+    #playe(drum_loop_events)
 
 
+
+
+
+def zip_events(*event_streams):
+    'combine 2 event streams, splitting the "sleep" commands if needed to give each event its proper timing'
+    stream_done = [False for i in event_streams]
+    next_event = [None for i in event_streams]
+
+    while True:
+
+        still_finding_nonsleep_events = True
+
+        while still_finding_nonsleep_events:
+
+            still_finding_nonsleep_events = False; "until proven True"
+
+            for i, event_stream in enumerate(event_streams):
+                'if needed, get event from this event_stream if any'
+                if next_event[i] is None and not stream_done[i]:
+                    try:
+                        next_event[i] = event_stream.next()
+                    except StopIteration:
+                        stream_done[i] = True
+
+                'go through all non-sleep events with no hesitation'
+                if next_event[i] is not None and not is_sleep_event(next_event[i]):
+                    yield next_event[i]
+                    still_finding_nonsleep_events = True
+                    next_event[i] = None
+
+        "now everything's either a sleep or it's done"
+        'deal with sleep events now that all event streams are either sleeping or StopIteration'
+        sleep_events = [event for event in next_event if is_sleep_event(event)]
+        if len(sleep_events) == 0: break
+        min_sleep_amt = min(get_sleep_time(event) for event in sleep_events)
+        yield ('sleep', min_sleep_amt); 'do the minimum sleep'
+
+        'subtract that minimum sleep amt from all the other sleeps'
+        for i,event in enumerate(next_event):
+            if event is None:
+                pass
+            elif get_sleep_time(event) == min_sleep_amt:
+                next_event[i] = None
+            else: # we have bigger sleep, subtract the small sleep (replace event)
+                current_sleep_time = get_sleep_time(next_event[i])
+                next_event[i] = ('sleep', current_sleep_time - min_sleep_amt)
+        
+
+def is_sleep_event(event):
+    return isinstance(event, tuple) and len(event) and event[0]=='sleep'
+
+def get_sleep_time(event):
+    if is_sleep_event(event):
+        return event[1]
+    else:
+        return None
+
+
+
+'maybe play something if invoked directly instead of imported'
 
 if __name__ == '__main__':
     if random.randint(0,1)==0:
