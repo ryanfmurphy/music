@@ -804,13 +804,20 @@ def strn2numbers(strn):
 def strn2pitches(strn):
     return close_big_intervals(strn2numbers(strn))
 
-def eventsg_strn(strn, dur=DURATION, leave_sounding=False):
-    return eventsg(strn2pitches(strn), dur=dur, leave_sounding=leave_sounding)
+SHOW_NOTES = True
+
+def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
+                show_notes=SHOW_NOTES):
+    return eventsg(
+        strn2pitches(strn), dur=dur, leave_sounding=leave_sounding,
+        show_notes=show_notes,
+    )
 
 estrn = eventsg_strn
 
-def play_strn(strn, dur=DURATION, leave_sounding=False):
-    playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding))
+def play_strn(strn, dur=DURATION, leave_sounding=False, show_notes=SHOW_NOTES):
+    playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
+                    show_notes=show_notes))
 
 
 def strn_note_on(ch):
@@ -841,13 +848,14 @@ bach6strn = [
     "e---m---o---a---b---R---S---E-S-R-b-E---_---------e---s---d---r---B---A---O---M---OAO-BAB-OMO-ESE---r---e---m---h---R-,-S---B---s---e---o---b-,-R---r---e---m---o---h---b---e---o---m-R-h-R-e-R-s---e---m---B-bhb-mem-srs-mem-srs-BHB-----,-b-'-"*2,
 ]
 
-def eventsg_strns(strns, octaves=None, dur=None, vel=VELOCITY):
+def eventsg_strns(strns, octaves=None, dur=None,
+                vel=VELOCITY, show_notes=SHOW_NOTES):
     parts = [strn2pitches(s) for s in strns]
     if octaves: # transpose as needed
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
     combined = izip(*parts)
-    for e in eventsg(combined, dur=dur, vel=vel):
+    for e in eventsg(combined, dur=dur, vel=vel, show_notes=show_notes):
         yield e
 
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
@@ -1147,6 +1155,20 @@ chordtxt = {
     'Bb major': 'hDF',
     'B major': 'bSM',
 
+    # short for major
+    'C': 'ceg',
+    'Db': 'rfo',
+    'D': 'dma',
+    'Eb': 'sgh',
+    'E': 'eob',
+    'F': 'faC',
+    'F#': 'mhR',
+    'G': 'gbD',
+    'Ab': 'oCS',
+    'A': 'aRE',
+    'Bb': 'hDF',
+    'B': 'bSM',
+
     'C7': 'cegh',
     'Db7': 'rfob',
     'D7': 'dmaC',
@@ -1173,6 +1195,19 @@ chordtxt = {
     'Bb major 7': 'hDFA',
     'B major 7': 'bSMH',
 
+    'Cmaj7': 'cegb',
+    'Dbmaj7': 'rfoC',
+    'Dmaj7': 'dmaR',
+    'Ebmaj7': 'sghD',
+    'Emaj7': 'eobS',
+    'Fmaj7': 'faCE',
+    'F#maj7': 'mhRF',
+    'Gmaj7': 'gbDM',
+    'Abmaj7': 'oCSG',
+    'Amaj7': 'aREO',
+    'Bbmaj7': 'hDFA',
+    'Bmaj7': 'bSMH',
+
     'C minor': 'csg',
     'Db minor': 'reo',
     'D minor': 'dfa',
@@ -1185,6 +1220,19 @@ chordtxt = {
     'A minor': 'aCE',
     'Bb minor': 'hRF',
     'B minor': 'bDM',
+
+    'Cm': 'csg',
+    'Dbm': 'reo',
+    'Dm': 'dfa',
+    'Ebm': 'smh',
+    'Em': 'egb',
+    'Fm': 'foC',
+    'F#m': 'maR',
+    'Gm': 'ghD',
+    'Abm': 'obS',
+    'Am': 'aCE',
+    'Bbm': 'hRF',
+    'Bm': 'bDM',
 
     'C minor 7': 'csgh',
     'Db minor 7': 'reob',
@@ -1199,6 +1247,19 @@ chordtxt = {
     'Bb minor 7': 'hRFO',
     'B minor 7': 'bDMA',
 
+    'Cm7': 'csgh',
+    'Dbm7': 'reob',
+    'Dm7': 'dfaC',
+    'Ebm7': 'smhR',
+    'Em7': 'egbD',
+    'Fm7': 'foCS',
+    'F#m7': 'maRE',
+    'Gm7': 'ghDF',
+    'Abm7': 'obSM',
+    'Am7': 'aCEG',
+    'Bbm7': 'hRFO',
+    'Bm7': 'bDMA',
+
     'C minor 6': 'csga',
     'Db minor 6': 'reoh',
     'D minor 6': 'dfab',
@@ -1211,6 +1272,19 @@ chordtxt = {
     'A minor 6': 'aCEM',
     'Bb minor 6': 'hRFG',
     'B minor 6': 'bDMO',
+
+    'Cm6': 'csga',
+    'Dbm6': 'reoh',
+    'Dm6': 'dfab',
+    'Ebm6': 'smhC',
+    'Em6': 'egbR',
+    'Fm6': 'foCD',
+    'F#m6': 'maRS',
+    'Gm6': 'ghDE',
+    'Abm6': 'obSF',
+    'Am6': 'aCEM',
+    'Bbm6': 'hRFG',
+    'Bm6': 'bDMO',
 
     'C minor major 7': 'csgb',
     'Db minor major 7': 'reoC',
@@ -1238,6 +1312,19 @@ chordtxt = {
     'Bb half-diminished 7': 'hREO',
     'B half-diminished 7': 'bDFA',
 
+    'Cm7b5': 'csmh',
+    'Dbm7b5': 'regb',
+    'Dm7b5': 'dfoC',
+    'Ebm7b5': 'smaR',
+    'Em7b5': 'eghD',
+    'Fm7b5': 'fobS',
+    'F#m7b5': 'maCE',
+    'Gm7b5': 'ghRF',
+    'Abm7b5': 'obDM',
+    'Am7b5': 'aCSG',
+    'Bbm7b5': 'hREO',
+    'Bm7b5': 'bDFA',
+
     'C diminished': 'csm',
     'Db diminished': 'reg',
     'D diminished': 'dfo',
@@ -1250,6 +1337,19 @@ chordtxt = {
     'A diminished': 'aCS',
     'Bb diminished': 'hRE',
     'B diminished': 'bDF',
+
+    'Co': 'csm',
+    'Dbo': 'reg',
+    'Do': 'dfo',
+    'Ebo': 'sma',
+    'Eo': 'egh',
+    'Fo': 'fob',
+    'F#o': 'maC',
+    'Go': 'ghR',
+    'Abo': 'obD',
+    'Ao': 'aCS',
+    'Bbo': 'hRE',
+    'Bo': 'bDF',
 
     'C diminished 7': 'csma',
     'Db diminished 7': 'regh',
@@ -1264,6 +1364,19 @@ chordtxt = {
     'Bb diminished 7': 'hREG',
     'B diminished 7': 'bDFO',
 
+    'Co7': 'csma',
+    'Dbo7': 'regh',
+    'Do7': 'dfob',
+    'Ebo7': 'smaC',
+    'Eo7': 'eghR',
+    'Fo7': 'fobD',
+    'F#o7': 'maCS',
+    'Go7': 'ghRE',
+    'Abo7': 'obDF',
+    'Ao7': 'aCSM',
+    'Bbo7': 'hREG',
+    'Bo7': 'bDFO',
+
     'C augmented': 'ceo',
     'Db augmented': 'rfa',
     'D augmented': 'dmh',
@@ -1276,6 +1389,19 @@ chordtxt = {
     'A augmented': 'aRF',
     'Bb augmented': 'hDM',
     'B augmented': 'bSG',
+
+    'C+': 'ceo',
+    'Db+': 'rfa',
+    'D+': 'dmh',
+    'Eb+': 'sgb',
+    'E+': 'eoC',
+    'F+': 'faR',
+    'F#+': 'mhD',
+    'G+': 'gbS',
+    'Ab+': 'oCE',
+    'A+': 'aRF',
+    'Bb+': 'hDM',
+    'B+': 'bSG',
 
     'Csus': 'cfg',
     'Dbsus': 'rmo',
@@ -1307,6 +1433,7 @@ chord_progressions = [
     'C minor', 'C minor major 7', 'C minor 7', 'C minor 6',
     'Ab major 7', 'F minor 7', 'D half-diminished 7', 'G7'
     ],
+    dbl([ 'Am', 'Dm', 'G', ]) + ['C','E7'],
 ]
 
 all_of_me = chord_progressions[3]
