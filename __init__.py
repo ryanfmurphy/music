@@ -848,14 +848,21 @@ bach6strn = [
     "e---m---o---a---b---R---S---E-S-R-b-E---_---------e---s---d---r---B---A---O---M---OAO-BAB-OMO-ESE---r---e---m---h---R-,-S---B---s---e---o---b-,-R---r---e---m---o---h---b---e---o---m-R-h-R-e-R-s---e---m---B-bhb-mem-srs-mem-srs-BHB-----,-b-'-"*2,
 ]
 
-def eventsg_strns(strns, octaves=None, dur=None,
-                vel=VELOCITY, show_notes=SHOW_NOTES):
-    parts = [strn2pitches(s) for s in strns]
+def eventsg_parts(parts, octaves=None, dur=DURATION,
+                  vel=VELOCITY, show_notes=SHOW_NOTES):
     if octaves: # transpose as needed
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
     combined = izip(*parts)
-    for e in eventsg(combined, dur=dur, vel=vel, show_notes=show_notes):
+    for e in eventsg(combined, dur=dur, vel=vel,
+                     show_notes=show_notes):
+        yield e
+
+def eventsg_strns(strns, octaves=None, dur=DURATION,
+                  vel=VELOCITY, show_notes=SHOW_NOTES):
+    parts = [strn2pitches(s) for s in strns]
+    for e in eventsg_parts(parts, octaves=octaves, dur=dur,
+                           vel=vel, show_notes=show_notes)
         yield e
 
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
@@ -1599,13 +1606,13 @@ def random_groovy_chords(mode=None):
             dur = random.randint(2,6)
             sleep(dur)
 
-def play_random_groovy_chords(mode=None):
+def play_random_groovy_chords(mode=None, vel=VELOCITY):
     try:
         last_chord = None
         for chord in random_groovy_chords(mode):
             chord = list(chord); 'solidify generator'
             chord_off(last_chord)
-            chord_on(chord)
+            chord_on(chord, vel=vel)
             last_chord = chord
     except KeyboardInterrupt:
         chord_off(last_chord)
@@ -1725,6 +1732,22 @@ def get_sleep_time(event):
     else:
         return None
 
+def open_chord(pitches):
+    'move 1 or more internal voices up an octave to open the voicing'
+    pitches = list(sorted(pitches))
+    if len(pitches) in (3,4):
+        pitches[1] += 12 # raise an octave
+        return list(sorted(pitches))
+    else:
+        return None # couldn't do anything
+
+def try_open_chord(pitches):
+    "open chord if there's an option to, but return the chord regardless"
+    open1 = open_chord(pitches)
+    if open1:
+        return open1
+    else:
+        return pitches
 
 
 'maybe play something if invoked directly instead of imported'
