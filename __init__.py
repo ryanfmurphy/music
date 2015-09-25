@@ -640,7 +640,7 @@ note_numbers = {
     'C':12,
     'I':12,
     'J':13,
-    'R':14,
+    'R':13,
     'D':14,
     'D':14,
     'Y':14,
@@ -862,7 +862,7 @@ def eventsg_strns(strns, octaves=None, dur=DURATION,
                   vel=VELOCITY, show_notes=SHOW_NOTES):
     parts = [strn2pitches(s) for s in strns]
     for e in eventsg_parts(parts, octaves=octaves, dur=dur,
-                           vel=vel, show_notes=show_notes)
+                           vel=vel, show_notes=show_notes):
         yield e
 
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
