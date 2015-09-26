@@ -7,6 +7,8 @@ CHORD_VEL = 65
 cur_chord = None
 prev_chord = None
 
+pause_disabled = True
+
 
 def under_assumption(assumption):
     if assumption == 'working with strings':
@@ -43,8 +45,12 @@ def play_funcs(env):
         play_func(func)
 
 def pause_amt(at_least=1):
-    low, high = at_least, at_least+3
-    return random.randint(low, high)
+    global pause_disabled
+    if pause_disabled:
+        return 0
+    else:
+        low, high = at_least, at_least+3
+        return random.randint(low, high)
 
 def with_pause_after(mel, pause=None):
     if pause is None:
@@ -69,7 +75,6 @@ def get_fname(fn):
 
 
 def play_func(fn, do_response=None):
-    global cur_chord, prev_chord
 
     fname = get_fname(fn)
 
@@ -86,34 +91,34 @@ def play_func(fn, do_response=None):
         if do_response is None:
             do_response = True #coinflip()
 
-        if do_response and is_function(fn):
-            response = fn()
-            if isinstance(response, types.GeneratorType):
-                for section in response:
-                    if cur_chord != prev_chord:
-                        midi.chordname_off(prev_chord, chan=1)
-                        midi.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
-                        print "chord:", cur_chord
-                        prev_chord = cur_chord
-                    print_response(section)
-                    pause2 = pause_amt(at_least = pause1)
-                    play_strn(
-                        with_pause_after(section, pause2),
-                        show_notes = False,
-                    )
-            else:
-                #todo make this into a function:
-                if cur_chord != prev_chord:
-                    midi.chordname_off(prev_chord, chan=1)
-                    midi.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
-                    print "chord:", cur_chord
-                    prev_chord = cur_chord
-                print_response(response)
-                pause2 = pause_amt(at_least = pause1)
-                play_strn(
-                    with_pause_after(response, pause2),
-                    show_notes = False,
-                )
+        if do_response:
+            play_fn_response(fn, pause1=pause1)
+
+def play_fn_response(fn, pause1=None):
+    if is_function(fn):
+        response = fn()
+        if isinstance(response, types.GeneratorType):
+            for section in response:
+                play_fn_response_1(section, pause1=pause1)
+        else:
+            play_fn_response_1(response, pause1=pause1)
+
+def play_fn_response_1(response, pause1=None):
+    process_chord_change()
+    print_response(response)
+    pause2 = pause_amt(at_least = pause1)
+    play_strn(
+        with_pause_after(response, pause2),
+        show_notes = False,
+    )
+
+def process_chord_change():
+    global cur_chord, prev_chord
+    if cur_chord != prev_chord:
+        midi.chordname_off(prev_chord, chan=1)
+        midi.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
+        print "chord:", cur_chord
+        prev_chord = cur_chord
 
 def musicall(fn): #todo args
     play_func(fn, do_response=True)
@@ -186,6 +191,7 @@ class MusicConsole(code.InteractiveConsole):
                 print_node = ast_print_node([_ast.Str(s=' '*50), underscore])
                 tree.body.append(print_node)
                 # play_whatever
+                    #todo doesn't work for generators yet
                 play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=False)
                 tree.body.append(play_whatever_node)
             #print ast.dump(tree)
@@ -262,6 +268,8 @@ def console(env):
         print "See ya!"
 
 def setup():
-    midi.rand_inst(chan=0)
-    midi.rand_inst(chan=1)
+    inst0 = midi.rand_inst(chan=0)
+    inst1 = midi.rand_inst(chan=1)
+    print "chan 0 gets instrument " + str(inst0)
+    print "chan 1 gets instrument " + str(inst1)
 

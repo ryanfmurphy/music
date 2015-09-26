@@ -55,25 +55,29 @@ def cBA_():
     parts = ('fed-', 'cdefe')
     return fns.some_parts(*parts)
 
-def aCF(): return '-CaCf' # leading hyphen means no pause
-def bDG(): return '-DbDg'
+def aCF(): return 'CaCf' # leading hyphen means no pause
+def bDG(): return 'DbDg'
 def CEA():
     fns.cur_chord = fns.options('D7', 'Am')
-    return '-OABcAMED-D---'
+    yield '-OAB'
+    fns.cur_chord = fns.options('D7', 'Am')
+    yield 'cAME'
+    fns.cur_chord = fns.options('D7', 'Bm')
+    yield 'D-D---'
 
 def edc():
     if fns.coinflip():
         fns.cur_chord = fns.options('Dm', 'G')
-        return '-defg---'
+        return 'defg---'
     else:
         fns.cur_chord = fns.options('C', 'Em')
         return 'efg'
 
 def abC():
     if fns.coinflip():
-        return '-b-a-g---'
+        return 'b-a-g---'
     else:
-        return '-b-g-e---'
+        return 'b-g-e---'
 
 def fga():
     r = random.randint(1,4)
@@ -100,12 +104,57 @@ def cde():
     yield "abC"
     fns.cur_chord = 'G'
     yield "bCD"
-    fns.cur_chord = 'C'
+    fns.cur_chord = fns.options('C','Am')
     yield "C"
+
+#todo fix the octaves of the incremental yields
+def cdeg():
+    if fns.coinflip():
+        fns.cur_chord = 'F'
+        yield "agfa"
+        fns.cur_chord = 'C'
+        yield "g-c-c-c-"
+        fns.cur_chord = 'C'
+        yield "cdeg"
+        fns.cur_chord = 'F'
+        yield "agfe"
+        fns.cur_chord = 'G'
+        yield "d---"
+    else:
+        yield "fedc"
+        yield "edcA"
+        yield "GAFG"
+        yield "EGcB"
+        fns.cur_chord = 'Am'
+        yield "cAEG"
+        fns.cur_chord = 'D'
+        yield "MAdr"
+        fns.cur_chord = 'G'
+        yield "dBGB"
+        fns.cur_chord = 'E7'
+        yield "OBed"
+        fns.cur_chord = 'Am'
+        yield "c-A-"
+
+def gedc():
+    if fns.coinflip():
+        fns.cur_chord = fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',)
+    return 'AcdeA-A'
+
+def fedc():
+    fns.cur_chord = fns.options('Fm','Fm7','F minor major 7','Dm7b5', 'Bb7')
+    yield 'ogf'
+    yield 'goC'
+    if fns.cur_chord in ('Fm7', 'Bb7'):
+        yield 'DSDoC--'
+    else:
+        yield 'DEDoC--'
+    if fns.coinflip():
+        fns.cur_chord = fns.options('F','Dm','C','Em7')
 
 if __name__ == '__main__':
     env = globals()
-    #names = ('ceg',)
+    #names = ('cde','cdeg')
     #env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
