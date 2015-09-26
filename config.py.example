@@ -1,0 +1,5 @@
+db_info = {
+    'dbname': 'INSERT_DB_NAME_HERE',
+    'username': 'INSERT_USERNAME_HERE',
+    'password': 'INSERT_PASSWORD_HERE',
+}
