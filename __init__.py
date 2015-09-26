@@ -156,7 +156,8 @@ def midi_note_off(pitch, chan=0):
 
 def midi_panic():
     for i in range(127):
-        midi_note_off(i) 
+        for ch in range(16):
+            midi_note_off(i, chan=ch) 
 
 def midi_program_change(instrument_no, chan=0):
     control = [0xc0 + chan, instrument_no]
@@ -192,12 +193,36 @@ def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
 
 
 def chord_on(ns, vel=VELOCITY, oct=4, chan=0):
-    for n in ns: note_on(n, vel, oct, chan=chan)
+    if ns:
+        for n in ns:
+            note_on(n, vel, oct, chan=chan)
 
 def chord_off(ns, oct=4, chan=0):
     if ns:
         for n in ns:
             note_off(n, oct, chan=chan)
+
+def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0):
+    if chordstrn:
+        pitches = strn2pitches(chordstrn)
+        chord_on(pitches, vel=vel, oct=oct, chan=chan)
+
+def chordstrn_off(chordstrn, oct=4, chan=0):
+    if chordstrn:
+        pitches = strn2pitches(chordstrn)
+        chord_off(pitches, oct=oct, chan=chan)
+
+def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0):
+    if chordname:
+        if chordname in chordtxt:
+            chordstrn = chordtxt[chordname]
+            chordstrn_on(chordstrn, vel=vel, oct=oct, chan=chan)
+
+def chordname_off(chordname, oct=4, chan=0):
+    if chordname:
+        if chordname in chordtxt:
+            chordstrn = chordtxt[chordname]
+            chordstrn_off(chordstrn, oct=oct, chan=chan)
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
@@ -402,7 +427,9 @@ def rand(): # can be passed as duration for a random "wind chimes" effect
 #note play() leaves notes followed by '-' sounding for some reason.
     #todo allow play() to leave a note followed by '-' playing but then still turn it off when it's done
 
-#todo make a function that takes an eventsg and filters out all the notes_off events
+'''
+* #todo make a function that takes an eventsg and filters out all the notes_off events
+'''
 def remove_note_offs(events):
     for event in events:
         pass #todo
@@ -839,13 +866,27 @@ def eventsg_strns(strns, octaves=None, dur=DURATION,
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
     playe(eventsg_strns(strns, octaves=octaves, dur=dur, vel=vel))
 
+def play_whatever(thing, show_notes=SHOW_NOTES):
+    err = ValueError('Unknown thing ' + thing + ' given to play_whatever()')
+    if isinstance(thing, str):
+        play_strn(thing, show_notes=show_notes)
+    elif is_listy(thing) and len(thing) > 0:
+        if isinstance(thing[0], str):
+            play_strns(thing, show_notes=show_notes)
+        elif isinstance(thing[0], int):
+            play(thing, show_notes=show_notes)
+        else:
+            raise err
+    else:
+        raise err
+
 def play2hands(strns, octaves=(1,0), dur=None):
     play_strns(strns, octaves=octaves, dur=dur)
 
-def play_bach4(octaves=(1,0), dur=None, vel=VELOCITY):
+def play_bach4(octaves=(1,0), dur=None, vel=VELOCITY): #specific
     play2hands(bach4strn, dur=dur)
 
-def play_bach6(dur=None):
+def play_bach6(dur=None): #specific
     play2hands(bach6strn, dur=dur)
 
 
@@ -1719,6 +1760,7 @@ def try_open_chord(pitches):
         return open1
     else:
         return pitches
+
 
 
 'maybe play something if invoked directly instead of imported'
