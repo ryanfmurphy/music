@@ -1124,6 +1124,7 @@ chorales = {
 'instruments I like (fluidR3 soundfont) ->'
 cool_instruments = {
     68: 'woodwinds',
+    73: 'flute',
 }
 
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
