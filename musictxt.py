@@ -40,9 +40,9 @@ def gCgfe(gef=None, fde=None):
 def edcHA():
     fns.cur_chord = fns.options('Dm','F','Bb')
     if fns.under_assumption('working with strings'):
-        return 'fe-d'
+        return 'fe-d--'
     else:
-        return ('f','e',None,'d')
+        return ('f','e','-','d','-','-')
 
 def cefg():
     if fns.coinflip():
@@ -116,10 +116,20 @@ def cdeg():
         yield "g-c-c-c-"
         fns.cur_chord = 'C'
         yield "cdeg"
-        fns.cur_chord = 'F'
-        yield "agfe"
-        fns.cur_chord = 'G'
-        yield "d---"
+        if fns.coinflip():
+            fns.cur_chord = 'F'
+            yield "agfe"
+            fns.cur_chord = 'G'
+            yield "d---"
+        else:
+            fns.cur_chord = 'F'
+            yield "agec"
+            fns.cur_chord = 'D7'
+            yield "d-cd"
+            fns.cur_chord = 'E7'
+            yield "e-seEeDe"
+            fns.cur_chord = fns.options('Am','F')
+            yield "C-a-"
     else:
         yield "fedc"
         yield "edcA"
@@ -136,6 +146,15 @@ def cdeg():
         fns.cur_chord = 'Am'
         yield "c-A-"
 
+def _EDE():
+    fns.cur_chord = fns.options('F7','Fm7','D7')
+    yield "SDCa"
+    yield "gsdc"
+    fns.cur_chord = fns.options('D7','Dm7','Gm7')
+    yield "A-_aCD-a"
+    fns.cur_chord = fns.options('Am7','Gm7')
+    #yield None
+
 def gedc():
     if fns.coinflip():
         fns.cur_chord = fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',)
@@ -151,6 +170,10 @@ def fedc():
         yield 'DEDoC--'
     if fns.coinflip():
         fns.cur_chord = fns.options('F','Dm','C','Em7')
+
+def gbDEFESEG_EE_D__():
+    fns.cur_chord = 'Fmaj7'
+    return 'E-CC--Cba-E-D-g-'
 
 if __name__ == '__main__':
     env = globals()
