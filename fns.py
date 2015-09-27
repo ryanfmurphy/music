@@ -268,8 +268,16 @@ def console(env):
         print "See ya!"
 
 def setup():
-    inst0 = midi.rand_inst(chan=0)
-    inst1 = midi.rand_inst(chan=1)
+    if len(sys.argv) > 1:
+        inst0 = int(sys.argv[1])
+        midi_program_change(inst0, chan=0)
+    else:
+        inst0 = midi.rand_inst(chan=0)
     print "chan 0 gets instrument " + str(inst0)
+    if len(sys.argv) > 2:
+        inst1 = int(sys.argv[2])
+        midi_program_change(inst1, chan=1)
+    else:
+        inst1 = midi.rand_inst(chan=1)
     print "chan 1 gets instrument " + str(inst1)
 
