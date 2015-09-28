@@ -59,9 +59,9 @@ def aCF(): return 'CaCf' # leading hyphen means no pause
 def bDG(): return 'DbDg'
 def CEA():
     fns.cur_chord = fns.options('D7', 'Am')
-    yield '-OAB'
-    fns.cur_chord = fns.options('D7', 'Am')
-    yield 'cAME'
+    yield '-OABcAME'
+    #fns.cur_chord = fns.options('D7', 'Am')
+    #yield 'cAME'
     fns.cur_chord = fns.options('D7', 'Bm')
     yield 'D-D---'
 
@@ -148,7 +148,10 @@ def cdeg():
 
 def _EDE():
     fns.cur_chord = fns.options('F7','Fm7','D7')
-    yield "SDCa"
+    if fns.cur_chord == 'Fm7':
+        yield "SDCo"
+    else:
+        yield "SDCa"
     yield "gsdc"
     fns.cur_chord = fns.options('D7','Dm7','Gm7')
     yield "A-_aCD-a"
@@ -175,9 +178,30 @@ def gbDEFESEG_EE_D__():
     fns.cur_chord = 'Fmaj7'
     return 'E-CC--Cba-E-D-g-'
 
+def abCD():
+    chords = iter(fns.options(
+        ('F','G','D','E','Am'),
+        ('Dm','E','F','G','Am'),
+        ('C','G','E7','E7','D7'),
+    ))
+    melody = iter(('E-EE','D-ED','Cb','ab','C-a-'))
+    for melpart in melody:
+        fns.cur_chord = chords.next()
+        yield melpart
+
+def Cbag():
+    fns.cur_chord = 'D7'
+    yield 'mEDC'
+    fns.cur_chord = 'G7'
+    yield 'bagf'
+    fns.cur_chord = 'E7'
+    yield 'eDCb'
+    fns.cur_chord = 'Am'
+    yield 'a---'
+
 if __name__ == '__main__':
     env = globals()
-    #names = ('cde','cdeg')
+    #names = ('abCD','Cbag',)
     #env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
