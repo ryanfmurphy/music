@@ -1,8 +1,9 @@
 from midi import *
-import types, random, code, ast, _ast
+import types, random, code, ast, _ast, readline, os, atexit
 import midi
 
 CHORD_VEL = 65
+RESPONSE_OFFSET = 30
 
 cur_chord = None
 prev_chord = None
@@ -42,7 +43,19 @@ def play_funcs(env):
     funcs = get_funcs(env).items()
     random.shuffle(funcs)
     for func_name,func in funcs:
-        play_func(func)
+        if coinflip():
+            times = 1
+        else:
+            times = options(1,2,4)
+        for x in range(times):
+            play_func(func)
+        maybe_delay()
+
+def maybe_delay():
+    print '...'
+    if coinflip(4):
+        delay = '-' * options(8,16,24,32) #,48,64)
+        play_strn(delay, show_notes=False)
 
 def pause_amt(at_least=1):
     global pause_disabled
@@ -64,7 +77,7 @@ def print_fname(fname):
     print fname + '()'
 
 def print_response(response):
-    print ' '*60 + response
+    print ' '*RESPONSE_OFFSET + response
 
 
 def get_fname(fn):
@@ -117,8 +130,14 @@ def process_chord_change():
     if cur_chord != prev_chord:
         midi.chordname_off(prev_chord, chan=1)
         midi.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
-        print "chord:", cur_chord
+        print_chord(cur_chord)
         prev_chord = cur_chord
+
+def chord_offset():
+    return RESPONSE_OFFSET / 2
+
+def print_chord(chord):
+    print ' '*chord_offset() + "[" + chord + "]"
 
 def musicall(fn): #todo args
     play_func(fn, do_response=True)
@@ -154,7 +173,28 @@ def goof_around(env):
 def take_from_env(names, env):
     return {name: env[name] for name in names}
 
+
 class MusicConsole(code.InteractiveConsole):
+
+    # the next 3 functions are about readline history / up-arrow completion
+
+    def __init__(self, locals=None, filename="<console>",
+                 histfile=os.path.expanduser("~/.music-console-history")):
+        code.InteractiveConsole.__init__(self, locals, filename)
+        self.init_history(histfile)
+
+    def init_history(self, histfile):
+        readline.parse_and_bind("tab: complete")
+        if hasattr(readline, "read_history_file"):
+            try:
+                readline.read_history_file(histfile)
+            except IOError:
+                pass
+            atexit.register(self.save_history, histfile)
+
+    def save_history(self, histfile):
+        readline.write_history_file(histfile)
+
 
     def runsource(self, source, filename='<input>', symbol='single'):
         # code taken from InteractiveInterpreter.runsource in code.py
@@ -213,6 +253,7 @@ class MusicConsole(code.InteractiveConsole):
             #print "yep! functioncall"
             play_func(fn)
 
+
 def ast_wrap_in_assn(var_name, ast_expr):
     assn = _ast.Assign(
         targets = [_ast.Name(id=var_name, ctx=_ast.Store())],
@@ -262,7 +303,8 @@ def ast_call_node(fname, *args, **kwargs):
     # actually it works with python -i
 def console(env):
     try:
-        MusicConsole(env).interact()
+        console = MusicConsole(env)
+        console.interact()
     except KeyboardInterrupt:
         midi.panic()
         print "See ya!"
