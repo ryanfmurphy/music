@@ -1123,9 +1123,15 @@ chorales = {
 
 'instruments I like (fluidR3 soundfont) ->'
 cool_instruments = {
+    44: 'strings',
     68: 'woodwinds',
+    70: 'bassoon', # goes well with 44 strings
     73: 'flute',
 }
+cool_inst_combos = (
+    (24, 49), # guitar and strings
+    (70, 44), # bassoon and strings
+)
 
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     global chorales
