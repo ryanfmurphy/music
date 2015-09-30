@@ -310,16 +310,31 @@ def console(env):
         print "See ya!"
 
 def setup():
+    choose_instruments()
+
+
+def choose_instruments():
+
+    sug0,sug1 = midi.cool_inst_combo()
+    do_sug = coinflip()
+
+    # set inst 0
     if len(sys.argv) > 1:
         inst0 = int(sys.argv[1])
-        midi_program_change(inst0, chan=0)
-    else:
+    elif do_sug:
+        inst0 = sug0
+    else: 
         inst0 = midi.rand_inst(chan=0)
-    print "chan 0 gets instrument " + str(inst0)
+    print "chan 0 gets instrument " + str(inst0) # actually changes patch
+    midi_program_change(inst0, chan=0)
+
+    # set inst 1
     if len(sys.argv) > 2:
         inst1 = int(sys.argv[2])
-        midi_program_change(inst1, chan=1)
+    elif do_sug:
+        inst1 = sug1
     else:
         inst1 = midi.rand_inst(chan=1)
-    print "chan 1 gets instrument " + str(inst1)
+    print "chan 1 gets instrument " + str(inst1) # actually changes patch
+    midi_program_change(inst1, chan=1)
 
