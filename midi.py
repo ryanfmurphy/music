@@ -1129,9 +1129,12 @@ cool_instruments = {
     73: 'flute',
 }
 cool_inst_combos = (
-    (24, 49), # guitar and strings
-    (70, 44), # bassoon and strings
+    (24, 49), # guitar and strings (#nice #balance)
+    (70, 44), # bassoon and strings (#nice #balance)
+    (25, 76), # twangy guitar thing and pad (#todo #balance pad could be a bit louder)
 )
+def cool_inst_combo():
+    return random.choice(cool_inst_combos)
 
 def play_chorale(num=None, composer=None, dur=.5, vel=VELOCITY):
     global chorales
@@ -1220,6 +1223,19 @@ chordtxt = {
     'A major 7': 'aREO',
     'Bb major 7': 'hDFA',
     'B major 7': 'bSMH',
+
+    'C major 6': 'cega',
+    'Db major 6': 'rfoh',
+    'D major 6': 'dmab',
+    'Eb major 6': 'sghC',
+    'E major 6': 'eobR',
+    'F major 6': 'faCD',
+    'F# major 6': 'mhRS',
+    'G major 6': 'gbDE',
+    'Ab major 6': 'oCSF',
+    'A major 6': 'aREM',
+    'Bb major 6': 'hDFG',
+    'B major 6': 'bSMO',
 
     'Cmaj7': 'cegb',
     'Dbmaj7': 'rfoC',
