@@ -375,3 +375,6 @@ def mult_duration(dur):
     global DURATION
     DURATION *= dur
 
+def play_id(strn):
+    play_strn(fname2mus_strn(strn), show_notes=False)
+
