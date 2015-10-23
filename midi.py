@@ -814,9 +814,11 @@ def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
 estrn = eventsg_strn
 
 def play_strn(strn, dur=DURATION, leave_sounding=False, show_notes=SHOW_NOTES):
-    playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
-                    show_notes=show_notes))
-
+    if strn is None:
+        return None
+    else:
+        playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
+              show_notes=show_notes))
 
 def strn_note_on(ch):
     pitch = note_numbers[ch]
@@ -1127,11 +1129,15 @@ cool_instruments = {
     68: 'woodwinds',
     70: 'bassoon', # goes well with 44 strings
     73: 'flute',
+    87: 'spiky pad',
 }
 cool_inst_combos = (
-    (24, 49), # guitar and strings (#nice #balance)
-    (70, 44), # bassoon and strings (#nice #balance)
-    (25, 76), # twangy guitar thing and pad (#todo #balance pad could be a bit louder)
+    (24,  49), # guitar and strings (#nice #balance)
+    (70,  44), # bassoon and strings (#nice #balance)
+    (25,  76), # twangy guitar thing and pad (#todo #balance pad could be a bit louder)
+    (61,  73), # brass lead with tremolo woodwind pad
+    (36, 104), # twangy lead with brassy pad
+    (36,  73), # twangy lead with tremolo woodwind pad
 )
 def cool_inst_combo():
     return random.choice(cool_inst_combos)
