@@ -1,9 +1,11 @@
-from midi import *
+from music import *
+from isness import *
 import types, random, code, ast, _ast, readline, os, atexit
-import midi
+import music
 
 CHORD_VEL = 65
 RESPONSE_OFFSET = 30
+DURATION = .2 #music.swung_dur(.4,.2).next
 
 cur_chord = None
 prev_chord = None
@@ -19,19 +21,6 @@ def under_assumption(assumption):
 
 def options(*things):
     return random.choice(things)
-
-def is_function(x):
-    return isinstance(x, types.FunctionType)
-
-def is_lambda(fn):
-    if is_function(fn): fn = fn.__name__
-    return fn == '<lambda>'
-
-def is_module(x):
-    return isinstance(x, types.ModuleType)
-
-def is_object(x):
-    return isinstance(x, object)
 
 def get_funcs(env):
     return {k:v for k,v in env.items()
@@ -68,16 +57,29 @@ def pause_amt(at_least=1):
 def with_pause_after(mel, pause=None):
     if pause is None:
         pause = pause_amt()
-    return mel + '-' * pause
+    if is_string(mel):
+        return mel + '-' * pause
+    else:
+        return None
+
+def str2mus_strn(strn):
+    if is_string(strn):
+        # get rid of weird characters
+        return strn.replace('!','') \
+                   .replace('?','')
+    else:
+        return strn
 
 def fname2mus_strn(fname):
-    return fname.replace('_','-')
+    strn = fname.replace('_','-')
+    return str2mus_strn(strn)
 
 def print_fname(fname):
     print fname + '()'
 
 def print_response(response):
-    print ' '*RESPONSE_OFFSET + response
+    if is_string(response):
+        print ' '*RESPONSE_OFFSET + str(response)
 
 
 def get_fname(fn):
@@ -89,21 +91,31 @@ def get_fname(fn):
 
 def play_func(fn, do_response=None):
 
+    global cur_chord
+
     fname = get_fname(fn)
 
     if not is_lambda(fname):
 
+        # do chord change if any
+        start_chord = get_start_chord(fn)
+        if start_chord:
+            cur_chord = start_chord
+            process_chord_change()
+
+        # play function name
         print_fname(fname)
         fname = fname2mus_strn(fname)
         pause1 = pause_amt()
         play_strn(
             with_pause_after(fname, pause1),
             show_notes = False,
+            dur = DURATION,
         )
 
+        # maybe run function and play response
         if do_response is None:
             do_response = True #coinflip()
-
         if do_response:
             play_fn_response(fn, pause1=pause1)
 
@@ -119,19 +131,28 @@ def play_fn_response(fn, pause1=None):
 def play_fn_response_1(response, pause1=None):
     process_chord_change()
     print_response(response)
+    response = str2mus_strn(response)
+
     pause2 = pause_amt(at_least = pause1)
+    response = with_pause_after(response, pause2)
+
     play_strn(
-        with_pause_after(response, pause2),
+        response,
         show_notes = False,
+        dur = DURATION, 
     )
 
 def process_chord_change():
     global cur_chord, prev_chord
     if cur_chord != prev_chord:
-        midi.chordname_off(prev_chord, chan=1)
-        midi.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
+        music.chordname_off(prev_chord, chan=1)
+        music.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
         print_chord(cur_chord)
         prev_chord = cur_chord
+
+def get_start_chord(fn):
+    if hasattr(fn, 'start_chord'):
+        return fn.start_chord
 
 def chord_offset():
     return RESPONSE_OFFSET / 2
@@ -164,11 +185,11 @@ def some_end_parts(*parts):
 def goof_around(env):
     try:
         while True:
-            #midi.play_strn(cefg())
+            #music.play_strn(cefg())
             play_funcs(env)
     except KeyboardInterrupt:
         print "Bye!"
-        midi.panic()
+        music.panic()
 
 def take_from_env(names, env):
     return {name: env[name] for name in names}
@@ -232,7 +253,7 @@ class MusicConsole(code.InteractiveConsole):
                 tree.body.append(print_node)
                 # play_whatever
                     #todo doesn't work for generators yet
-                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=False)
+                play_whatever_node = ast_call_node('music.play_whatever', '_', show_notes=False)
                 tree.body.append(play_whatever_node)
             #print ast.dump(tree)
             code_obj = compile(tree, '<input>', 'exec')
@@ -306,7 +327,7 @@ def console(env):
         console = MusicConsole(env)
         console.interact()
     except KeyboardInterrupt:
-        midi.panic()
+        music.panic()
         print "See ya!"
 
 def setup():
@@ -315,26 +336,42 @@ def setup():
 
 def choose_instruments():
 
-    sug0,sug1 = midi.cool_inst_combo()
+    sug0,sug1 = music.cool_inst_combo()
     do_sug = coinflip()
 
     # set inst 0
+    print "Channel 0:",
     if len(sys.argv) > 1:
         inst0 = int(sys.argv[1])
+        print "setting custom instrument", inst0
     elif do_sug:
         inst0 = sug0
+        print "known cool instrument combo", inst0
     else: 
-        inst0 = midi.rand_inst(chan=0)
-    print "chan 0 gets instrument " + str(inst0) # actually changes patch
-    midi_program_change(inst0, chan=0)
+        inst0 = music.rand_inst(chan=0)
+        print "experimental random instrument", inst0
+    # actually changes patch
+    music.midi_program_change(inst0, chan=0)
 
     # set inst 1
+    print "Channel 1:",
     if len(sys.argv) > 2:
         inst1 = int(sys.argv[2])
+        print "setting custom instrument", inst1
     elif do_sug:
         inst1 = sug1
+        print "known cool instrument combo", inst1
     else:
-        inst1 = midi.rand_inst(chan=1)
-    print "chan 1 gets instrument " + str(inst1) # actually changes patch
-    midi_program_change(inst1, chan=1)
+        inst1 = music.rand_inst(chan=1)
+        print "experimental random instrument", inst1
+    # actually changes patch
+    music.midi_program_change(inst1, chan=1)
+
+def change_duration(dur):
+    global DURATION
+    DURATION = dur
+
+def mult_duration(dur):
+    global DURATION
+    DURATION *= dur
 
