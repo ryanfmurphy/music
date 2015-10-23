@@ -1,4 +1,4 @@
-import midi, types, random, fns, pdb, musictxt
+import midi, random, fns, pdb, musictxt
 
 def ceg():
     fns.cur_chord = "C"
@@ -127,7 +127,7 @@ def cdeg():
             fns.cur_chord = 'D7'
             yield "d-cd"
             fns.cur_chord = 'E7'
-            yield "e-seEeDe"
+            yield "e-seE_De"
             fns.cur_chord = fns.options('Am','F')
             yield "C-a-"
     else:
@@ -199,9 +199,38 @@ def Cbag():
     fns.cur_chord = 'Am'
     yield 'a---'
 
+def efede():
+    speed = fns.options(.3,.2,.1)
+    fns.change_duration(speed)
+
+def edcAc_A():
+    fns.cur_chord = 'Am'
+    return 'f--edcAAA'
+
+def gagededc():
+    fns.cur_chord = 'Am'
+    return '-cdceedc'
+
+def daaaCb_a():
+    fns.cur_chord = 'D7'
+    return '-AAAcdeg'
+
+def gcccsd_c():
+    fns.cur_chord = 'Cm'
+    yield '-cccsfgH'
+    fns.cur_chord = 'Bb'
+    yield '-hhhDSFO'
+    fns.cur_chord = 'Ab'
+    yield '-oooCDSG'
+    fns.cur_chord = 'Fm'
+    yield '-OGF-S-C'
+    yield '-dsH-G--'
+gcccsd_c.start_chord = 'Cm'
+    
+
 if __name__ == '__main__':
     env = globals()
-    #names = ('abCD','Cbag',)
+    #names = ('gcccsd_c', 'daaaCb_a', 'gagededc', 'edcAc_A')
     #env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
