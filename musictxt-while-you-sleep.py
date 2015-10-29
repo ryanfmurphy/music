@@ -27,9 +27,3 @@ if __name__ == '__main__':
     play_loop()
     fns.console(env = env)
 
-#todo shorted cur_chord and start_chord to just chord
-#todo allow fn.start_chord to be a function
-#todo decorator for start_chord
-#todo only choose a new instrument if "new" is chosen as argv,
-    # else keep the existing ones
-
