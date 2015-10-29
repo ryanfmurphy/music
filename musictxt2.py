@@ -27,20 +27,24 @@ def cde():
 cde.chord = 'C'
 '''
 
+@fns.start_chord('C')
 def g__edc__():
     yield 'efmgec--'
-g__edc__.chord = 'C'
 
+@fns.start_chord('Fmaj7')
 def fedcAcee():
     fns.chord = 'D7'
     yield '-d------'
-fedcAcee.chord = 'Fmaj7'
 
 if __name__ == '__main__':
     def play_loop():
-        while True:
-            fns.play_func( g__edc__ )
-            fns.play_func( fedcAcee )
+        try: 
+            while True:
+                fns.play_func( g__edc__ )
+                fns.play_func( fedcAcee )
+        except KeyboardInterrupt:
+            midi.panic()
+            
     env = globals()
     fns.setup()
     #fns.goof_around(env)
@@ -48,7 +52,6 @@ if __name__ == '__main__':
     fns.console(env = env)
 
 #todo continuous octave streaming from one fn / yield to the next (or some option to do it)
-#todo decorator for start_chord
 #todo only choose a new instrument if "new" is chosen as argv,
     # else keep the existing ones
 

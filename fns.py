@@ -383,3 +383,12 @@ def mult_duration(dur):
 def play_id(strn):
     play_strn(fname2mus_strn(strn), show_notes=False)
 
+# the start_chord decorator
+def start_chord(the_chord):
+    def outer(func):
+        #def inner(*args, **kwargs):
+        #    return func(*args, **kwargs)
+        func.chord = the_chord
+        return func
+    return outer
+
