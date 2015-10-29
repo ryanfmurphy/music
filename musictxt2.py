@@ -37,9 +37,14 @@ def fedcAcee():
 fedcAcee.start_chord = 'Fmaj7'
 
 if __name__ == '__main__':
+    def play_loop():
+        while True:
+            fns.play_func( g__edc__ )
+            fns.play_func( fedcAcee )
     env = globals()
     fns.setup()
-    fns.goof_around(env)
+    #fns.goof_around(env)
+    play_loop()
     fns.console(env = env)
 
 #todo shorted cur_chord and start_chord to just chord
