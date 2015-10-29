@@ -6,6 +6,7 @@ import music
 CHORD_VEL = 65
 RESPONSE_OFFSET = 30
 DURATION = .2 #music.swung_dur(.4,.2).next
+SOMETIMES_DELAY = True
 
 cur_chord = None
 prev_chord = None
@@ -41,9 +42,10 @@ def play_funcs(env):
         maybe_delay()
 
 def maybe_delay():
-    print '...'
-    if coinflip(4):
-        delay = '-' * options(8,16,24,32) #,48,64)
+    if SOMETIMES_DELAY and coinflip(4):
+        delay_len = options(8,16,24,32) #,48,64)
+        print '.' * delay_len
+        delay = '-' * delay_len
         play_strn(delay, show_notes=False)
 
 def pause_amt(at_least=1):
