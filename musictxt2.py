@@ -47,7 +47,6 @@ if __name__ == '__main__':
     play_loop()
     fns.console(env = env)
 
-#done shorten cur_chord to just chord
 #todo shorten fn.start_chord to just chord
 #todo allow fn.start_chord to be a function
 #todo decorator for start_chord
