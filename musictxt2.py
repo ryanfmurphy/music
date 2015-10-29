@@ -9,20 +9,20 @@ def cde():
     yield 'efg'
     if fns.coinflip():
         yield 'fga'
-        fns.cur_chord = 'F'
+        fns.chord = 'F'
         yield 'gab'
         yield 'abC'
-        fns.cur_chord = 'G'
+        fns.chord = 'G'
         yield 'bCD'
-        fns.cur_chord = 'C'
+        fns.chord = 'C'
         yield 'C--'
     else:
         yield 'fed'
-        fns.cur_chord = 'Dm'
+        fns.chord = 'Dm'
         yield 'edc'
-        fns.cur_chord = 'G'
+        fns.chord = 'G'
         yield 'dcB'
-        fns.cur_chord = 'C'
+        fns.chord = 'C'
         yield 'c-----'
 cde.start_chord = 'C'
 '''
@@ -32,7 +32,7 @@ def g__edc__():
 g__edc__.start_chord = 'C'
 
 def fedcAcee():
-    fns.cur_chord = 'D7'
+    fns.chord = 'D7'
     yield '-d------'
 fedcAcee.start_chord = 'Fmaj7'
 
@@ -47,7 +47,8 @@ if __name__ == '__main__':
     play_loop()
     fns.console(env = env)
 
-#todo shorted cur_chord and start_chord to just chord
+#done shorten cur_chord to just chord
+#todo shorten fn.start_chord to just chord
 #todo allow fn.start_chord to be a function
 #todo decorator for start_chord
 #todo only choose a new instrument if "new" is chosen as argv,

@@ -1,12 +1,12 @@
 import midi, random, fns, pdb, musictxt
 
 def ceg():
-    fns.cur_chord = "C"
+    fns.chord = "C"
     if fns.coinflip():
         response = fns.options(*"cdefgaBC")
     else:
         response = "dBG"
-        fns.cur_chord = "G major"
+        fns.chord = "G major"
     if fns.coinflip():
         return gCgfe(response)
     else:
@@ -17,14 +17,14 @@ def edceg():
 
 
 def gCgfe(gef=None, fde=None):
-    fns.cur_chord = "C"
+    fns.chord = "C"
     if gef == "dBG":
         if fde == "cAG":
             return "ef|gCgfe"
         elif fde is 'fde':
             return "cAG";
         elif fde is None:
-            fns.cur_chord = "G7"
+            fns.chord = "G7"
             return 'fde-cAG-';
 
     if fde == "gafed":
@@ -38,7 +38,7 @@ def gCgfe(gef=None, fde=None):
                         "abC","baf","ede","eeA")
 
 def edcHA():
-    fns.cur_chord = fns.options('Dm','F','Bb')
+    fns.chord = fns.options('Dm','F','Bb')
     if fns.under_assumption('working with strings'):
         return 'fe-d--'
     else:
@@ -46,31 +46,31 @@ def edcHA():
 
 def cefg():
     if fns.coinflip():
-        fns.cur_chord = fns.options('C','Em','Am','Cmaj7','Em7','Am7')
+        fns.chord = fns.options('C','Em','Am','Cmaj7','Em7','Am7')
     parts = ('fed-','cBA-')
     return fns.some_parts(*parts)
 
 def cBA_():
-    fns.cur_chord = fns.options('Am','Am7')
+    fns.chord = fns.options('Am','Am7')
     parts = ('fed-', 'cdefe')
     return fns.some_parts(*parts)
 
 def aCF(): return 'CaCf' # leading hyphen means no pause
 def bDG(): return 'DbDg'
 def CEA():
-    fns.cur_chord = fns.options('D7', 'Am')
+    fns.chord = fns.options('D7', 'Am')
     yield '-OABcAME'
-    #fns.cur_chord = fns.options('D7', 'Am')
+    #fns.chord = fns.options('D7', 'Am')
     #yield 'cAME'
-    fns.cur_chord = fns.options('D7', 'Bm')
+    fns.chord = fns.options('D7', 'Bm')
     yield 'D-D---'
 
 def edc():
     if fns.coinflip():
-        fns.cur_chord = fns.options('Dm', 'G')
+        fns.chord = fns.options('Dm', 'G')
         return 'defg---'
     else:
-        fns.cur_chord = fns.options('C', 'Em')
+        fns.chord = fns.options('C', 'Em')
         return 'efg'
 
 def abC():
@@ -82,13 +82,13 @@ def abC():
 def fga():
     r = random.randint(1,4)
     if r==1:
-        fns.cur_chord = fns.options('D7', 'F#m7b5', 'B7')
+        fns.chord = fns.options('D7', 'F#m7b5', 'B7')
         return 'mga'
     elif r==2:
-        fns.cur_chord = fns.options('C','F')
+        fns.chord = fns.options('C','F')
         return 'gec'
     elif r==3:
-        fns.cur_chord = 'Am'
+        fns.chord = 'Am'
         return 'abC'
     elif r==4:
         return 'abCbabCDE-'
@@ -99,83 +99,83 @@ def cde():
     yield "def"
     yield "efg"
     yield "fga"
-    fns.cur_chord = 'F'
+    fns.chord = 'F'
     yield "gab"
     yield "abC"
-    fns.cur_chord = 'G'
+    fns.chord = 'G'
     yield "bCD"
-    fns.cur_chord = fns.options('C','Am')
+    fns.chord = fns.options('C','Am')
     yield "C"
 
 #todo fix the octaves of the incremental yields
 def cdeg():
     if fns.coinflip():
-        fns.cur_chord = 'F'
+        fns.chord = 'F'
         yield "agfa"
-        fns.cur_chord = 'C'
+        fns.chord = 'C'
         yield "g-c-c-c-"
-        fns.cur_chord = 'C'
+        fns.chord = 'C'
         yield "cdeg"
         if fns.coinflip():
-            fns.cur_chord = 'F'
+            fns.chord = 'F'
             yield "agfe"
-            fns.cur_chord = 'G'
+            fns.chord = 'G'
             yield "d---"
         else:
-            fns.cur_chord = 'F'
+            fns.chord = 'F'
             yield "agec"
-            fns.cur_chord = 'D7'
+            fns.chord = 'D7'
             yield "d-cd"
-            fns.cur_chord = 'E7'
+            fns.chord = 'E7'
             yield "e-seE_De"
-            fns.cur_chord = fns.options('Am','F')
+            fns.chord = fns.options('Am','F')
             yield "C-a-"
     else:
         yield "fedc"
         yield "edcA"
         yield "GAFG"
         yield "EGcB"
-        fns.cur_chord = 'Am'
+        fns.chord = 'Am'
         yield "cAEG"
-        fns.cur_chord = 'D'
+        fns.chord = 'D'
         yield "MAdr"
-        fns.cur_chord = 'G'
+        fns.chord = 'G'
         yield "dBGB"
-        fns.cur_chord = 'E7'
+        fns.chord = 'E7'
         yield "OBed"
-        fns.cur_chord = 'Am'
+        fns.chord = 'Am'
         yield "c-A-"
 
 def _EDE():
-    fns.cur_chord = fns.options('F7','Fm7','D7')
-    if fns.cur_chord == 'Fm7':
+    fns.chord = fns.options('F7','Fm7','D7')
+    if fns.chord == 'Fm7':
         yield "SDCo"
     else:
         yield "SDCa"
     yield "gsdc"
-    fns.cur_chord = fns.options('D7','Dm7','Gm7')
+    fns.chord = fns.options('D7','Dm7','Gm7')
     yield "A-_aCD-a"
-    fns.cur_chord = fns.options('Am7','Gm7')
+    fns.chord = fns.options('Am7','Gm7')
     #yield None
 
 def gedc():
     if fns.coinflip():
-        fns.cur_chord = fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',)
+        fns.chord = fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',)
     return 'AcdeA-A'
 
 def fedc():
-    fns.cur_chord = fns.options('Fm','Fm7','F minor major 7','Dm7b5', 'Bb7')
+    fns.chord = fns.options('Fm','Fm7','F minor major 7','Dm7b5', 'Bb7')
     yield 'ogf'
     yield 'goC'
-    if fns.cur_chord in ('Fm7', 'Bb7'):
+    if fns.chord in ('Fm7', 'Bb7'):
         yield 'DSDoC--'
     else:
         yield 'DEDoC--'
     if fns.coinflip():
-        fns.cur_chord = fns.options('F','Dm','C','Em7')
+        fns.chord = fns.options('F','Dm','C','Em7')
 
 def gbDEFESEG_EE_D__():
-    fns.cur_chord = 'Fmaj7'
+    fns.chord = 'Fmaj7'
     return 'E-CC--Cba-E-D-g-'
 
 def abCD():
@@ -186,17 +186,17 @@ def abCD():
     ))
     melody = iter(('E-EE','D-ED','Cb','ab','C-a-'))
     for melpart in melody:
-        fns.cur_chord = chords.next()
+        fns.chord = chords.next()
         yield melpart
 
 def Cbag():
-    fns.cur_chord = 'D7'
+    fns.chord = 'D7'
     yield 'mEDC'
-    fns.cur_chord = 'G7'
+    fns.chord = 'G7'
     yield 'bagf'
-    fns.cur_chord = 'E7'
+    fns.chord = 'E7'
     yield 'eDCb'
-    fns.cur_chord = 'Am'
+    fns.chord = 'Am'
     yield 'a---'
 
 def efede():
@@ -204,25 +204,25 @@ def efede():
     fns.change_duration(speed)
 
 def edcAc_A():
-    fns.cur_chord = 'Am'
+    fns.chord = 'Am'
     return 'f--edcAAA'
 
 def gagededc():
-    fns.cur_chord = 'Am'
+    fns.chord = 'Am'
     return '-cdceedc'
 
 def daaaCb_a():
-    fns.cur_chord = 'D7'
+    fns.chord = 'D7'
     return '-AAAcdeg'
 
 def gcccsd_c():
-    fns.cur_chord = 'Cm'
+    fns.chord = 'Cm'
     yield '-cccsfgH'
-    fns.cur_chord = 'Bb'
+    fns.chord = 'Bb'
     yield '-hhhDSFO'
-    fns.cur_chord = 'Ab'
+    fns.chord = 'Ab'
     yield '-oooCDSG'
-    fns.cur_chord = 'Fm'
+    fns.chord = 'Fm'
     yield '-OGF-S-C'
     yield '-dsH-G--'
 gcccsd_c.start_chord = 'Cm'

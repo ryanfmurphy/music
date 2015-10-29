@@ -8,9 +8,9 @@ def __f__d__A__GA___():
 __f__d__A__GA___.start_chord = 'Dm'
 
 def __m__m__m__gm___():
-    fns.cur_chord = 'C'
+    fns.chord = 'C'
     yield '--e--e--'
-    fns.cur_chord = 'G'
+    fns.chord = 'G'
     yield 'd-------'
 __m__m__m__gm___.start_chord = 'D'
 

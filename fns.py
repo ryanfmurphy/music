@@ -8,7 +8,7 @@ RESPONSE_OFFSET = 30
 DURATION = .2 #music.swung_dur(.4,.2).next
 SOMETIMES_DELAY = True
 
-cur_chord = None
+chord = None
 prev_chord = None
 
 pause_disabled = True
@@ -93,7 +93,7 @@ def get_fname(fn):
 
 def play_func(fn, do_response=None):
 
-    global cur_chord
+    global chord
 
     fname = get_fname(fn)
 
@@ -102,7 +102,7 @@ def play_func(fn, do_response=None):
         # do chord change if any
         start_chord = get_start_chord(fn)
         if start_chord:
-            cur_chord = start_chord
+            chord = start_chord
             process_chord_change()
 
         # play function name
@@ -145,12 +145,12 @@ def play_fn_response_1(response, pause1=None):
     )
 
 def process_chord_change():
-    global cur_chord, prev_chord
-    if cur_chord != prev_chord:
+    global chord, prev_chord
+    if chord != prev_chord:
         music.chordname_off(prev_chord, chan=1)
-        music.chordname_on(cur_chord, vel=CHORD_VEL, chan=1)
-        print_chord(cur_chord)
-        prev_chord = cur_chord
+        music.chordname_on(chord, vel=CHORD_VEL, chan=1)
+        print_chord(chord)
+        prev_chord = chord
 
 def get_start_chord(fn):
     if hasattr(fn, 'start_chord'):
