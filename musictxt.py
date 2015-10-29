@@ -225,7 +225,7 @@ def gcccsd_c():
     fns.chord = 'Fm'
     yield '-OGF-S-C'
     yield '-dsH-G--'
-gcccsd_c.start_chord = 'Cm'
+gcccsd_c.chord = 'Cm'
     
 
 if __name__ == '__main__':

@@ -24,17 +24,17 @@ def cde():
         yield 'dcB'
         fns.chord = 'C'
         yield 'c-----'
-cde.start_chord = 'C'
+cde.chord = 'C'
 '''
 
 def g__edc__():
     yield 'efmgec--'
-g__edc__.start_chord = 'C'
+g__edc__.chord = 'C'
 
 def fedcAcee():
     fns.chord = 'D7'
     yield '-d------'
-fedcAcee.start_chord = 'Fmaj7'
+fedcAcee.chord = 'Fmaj7'
 
 if __name__ == '__main__':
     def play_loop():
@@ -47,7 +47,6 @@ if __name__ == '__main__':
     play_loop()
     fns.console(env = env)
 
-#todo shorten fn.start_chord to just chord
 #todo allow fn.start_chord to be a function
 #todo decorator for start_chord
 #todo only choose a new instrument if "new" is chosen as argv,

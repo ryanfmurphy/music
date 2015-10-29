@@ -153,8 +153,8 @@ def process_chord_change():
         prev_chord = chord
 
 def get_start_chord(fn):
-    if hasattr(fn, 'start_chord'):
-        return fn.start_chord
+    if hasattr(fn, 'chord'):
+        return fn.chord
 
 def chord_offset():
     return RESPONSE_OFFSET / 2

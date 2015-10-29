@@ -7,7 +7,7 @@ fns.SOMETIMES_DELAY = False
 def m___m___m___m___():
     fns.chord = 'G'
     yield '----------------'
-m___m___m___m___.start_chord = 'D'
+m___m___m___m___.chord = 'D'
 
 if __name__ == '__main__':
     def play_loop():
