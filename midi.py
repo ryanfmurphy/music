@@ -805,7 +805,9 @@ def strn2pitches(strn):
 SHOW_NOTES = True
 
 def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
-                show_notes=SHOW_NOTES):
+                show_notes=None):
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     return eventsg(
         strn2pitches(strn), dur=dur, leave_sounding=leave_sounding,
         show_notes=show_notes,
@@ -813,7 +815,9 @@ def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
 
 estrn = eventsg_strn
 
-def play_strn(strn, dur=DURATION, leave_sounding=False, show_notes=SHOW_NOTES):
+def play_strn(strn, dur=DURATION, leave_sounding=False, show_notes=None):
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     if strn is None:
         return None
     else:
@@ -849,7 +853,9 @@ bach6strn = [
 ]
 
 def eventsg_parts(parts, octaves=None, dur=DURATION,
-                  vel=VELOCITY, show_notes=SHOW_NOTES):
+                  vel=VELOCITY, show_notes=None):
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     if octaves: # transpose as needed
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
@@ -859,7 +865,9 @@ def eventsg_parts(parts, octaves=None, dur=DURATION,
         yield e
 
 def eventsg_strns(strns, octaves=None, dur=DURATION,
-                  vel=VELOCITY, show_notes=SHOW_NOTES):
+                  vel=VELOCITY, show_notes=None):
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     parts = [strn2pitches(s) for s in strns]
     for e in eventsg_parts(parts, octaves=octaves, dur=dur,
                            vel=vel, show_notes=show_notes):
@@ -868,7 +876,9 @@ def eventsg_strns(strns, octaves=None, dur=DURATION,
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
     playe(eventsg_strns(strns, octaves=octaves, dur=dur, vel=vel))
 
-def play_whatever(thing, show_notes=SHOW_NOTES):
+def play_whatever(thing, show_notes=None):
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     err = ValueError('Unknown thing ' + thing + ' given to play_whatever()')
     if isinstance(thing, str):
         play_strn(thing, show_notes=show_notes)
@@ -959,7 +969,7 @@ iter_type = type(iter([0]))
 
 def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
             sounding_notes = None, leave_sounding = False,
-            show_notes = True, show_note_names = True):
+            show_notes = None, show_note_names = True):
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
@@ -968,6 +978,8 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
     "#todo there's an issue where if one voice runs out of notes before the other\
     it will leave the last note hanging.  Passing 'None' should stop the voice"
 
+    global SHOW_NOTES
+    if show_notes is None: show_notes = SHOW_NOTES
     if dur is None: dur = DURATION
 
     first_time = True
@@ -1138,6 +1150,7 @@ cool_inst_combos = (
     (61,  73), # brass lead with tremolo woodwind pad
     (36, 104), # twangy lead with brassy pad
     (36,  73), # twangy lead with tremolo woodwind pad
+    (10,  63), # bells and brassy pad
 )
 def cool_inst_combo():
     return random.choice(cool_inst_combos)
