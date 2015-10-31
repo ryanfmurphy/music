@@ -336,7 +336,10 @@ def console(env):
         print "See ya!"
 
 def setup():
-    choose_instruments()
+    if len(sys.argv) > 1:
+        choose_instruments()
+    else:
+        print "Leaving instruments the same"
 
 
 def choose_instruments():
@@ -346,7 +349,7 @@ def choose_instruments():
 
     # set inst 0
     print "Channel 0:",
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and sys.argv[1] != 'rnd':
         inst0 = int(sys.argv[1])
         print "setting custom instrument", inst0
     elif do_sug:
@@ -374,11 +377,13 @@ def choose_instruments():
 
 def change_duration(dur):
     global DURATION
+    print "Changing tempo to " + str(dur)
     DURATION = dur
 
-def mult_duration(dur):
+def mult_duration(durmult):
     global DURATION
-    DURATION *= dur
+    print "Multiplying tempo by factor of " + str(durmult)
+    DURATION *= durmult
 
 def play_id(strn):
     play_strn(fname2mus_strn(strn), show_notes=False)
