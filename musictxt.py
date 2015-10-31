@@ -1,5 +1,7 @@
 import midi, random, fns, pdb, musictxt
 
+fns.PAUSE_DISABLED = False
+
 def ceg():
     fns.chord = "C"
     if fns.coinflip():

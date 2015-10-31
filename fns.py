@@ -7,11 +7,10 @@ CHORD_VEL = 65
 RESPONSE_OFFSET = 30
 DURATION = .2 #music.swung_dur(.4,.2).next
 SOMETIMES_DELAY = True
+PAUSE_DISABLED = True
 
 chord = None
 prev_chord = None
-
-pause_disabled = True
 
 
 def under_assumption(assumption):
@@ -49,8 +48,8 @@ def maybe_delay():
         play_strn(delay, show_notes=False)
 
 def pause_amt(at_least=1):
-    global pause_disabled
-    if pause_disabled:
+    global PAUSE_DISABLED
+    if PAUSE_DISABLED:
         return 0
     else:
         low, high = at_least, at_least+3
