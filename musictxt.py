@@ -1,6 +1,6 @@
 import midi, random, fns, pdb, musictxt
 
-fns.PAUSE_DISABLED = False
+#fns.PAUSE_DISABLED = False
 
 def ceg():
     fns.chord = "C"
@@ -18,6 +18,7 @@ def edceg():
     return 'fed'
 
 
+@fns.start_chord('C')
 def gCgfe(gef=None, fde=None):
     fns.chord = "C"
     if gef == "dBG":
@@ -39,7 +40,8 @@ def gCgfe(gef=None, fde=None):
                         "egC","def","faD","efg",
                         "abC","baf","ede","eeA")
 
-def edcHA():
+@fns.start_chord('C7')
+def edcHA_():
     fns.chord = fns.options('Dm','F','Bb')
     if fns.under_assumption('working with strings'):
         return 'fe-d--'
@@ -107,7 +109,7 @@ def cde():
     fns.chord = 'G'
     yield "bCD"
     fns.chord = fns.options('C','Am')
-    yield "C"
+    yield "C--"
 
 #todo fix the octaves of the incremental yields
 def cdeg():
@@ -163,7 +165,7 @@ def _EDE():
 def gedc():
     if fns.coinflip():
         fns.chord = fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',)
-    return 'AcdeA-A'
+    return 'AcdeA-A-'
 
 def fedc():
     fns.chord = fns.options('Fm','Fm7','F minor major 7','Dm7b5', 'Bb7')
@@ -213,9 +215,9 @@ def gagededc():
     fns.chord = 'Am'
     return '-cdceedc'
 
-def daaaCb_a():
+def aaaCb_a_():
     fns.chord = 'D7'
-    return '-AAAcdeg'
+    return 'AAAcdeg-'
 
 def gcccsd_c():
     fns.chord = 'Cm'
