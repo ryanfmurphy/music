@@ -10,7 +10,13 @@ SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
 
 chord = None
-prev_chord = None
+sounding_chord = None
+
+# change the chord to the_chord only if it's not already
+def chord_to(the_chord):
+    global chord, sounding_chord
+    if the_chord != sounding_chord:
+        chord = the_chord
 
 
 def under_assumption(assumption):
@@ -144,12 +150,14 @@ def play_fn_response_1(response, pause1=None):
     )
 
 def process_chord_change():
-    global chord, prev_chord
+    global chord, sounding_chord
     if chord is not None:
-        music.chordname_off(prev_chord, chan=1)
+        if sounding_chord:
+            music.chordname_off(sounding_chord, chan=1)
         music.chordname_on(chord, vel=CHORD_VEL, chan=1)
         print_chord(chord)
-        prev_chord = chord
+        sounding_chord = chord
+        chord = None
 
 def get_start_chord(fn):
     if hasattr(fn, 'chord'):
