@@ -343,21 +343,22 @@ def console(env):
         print "See ya!"
 
 def setup():
+    # need to give some arg or it won't change instruments, "rnd" to randomly choose
     if len(sys.argv) > 1:
-        choose_instruments()
+        choose_instruments(sys.argv)
     else:
         print "Leaving instruments the same"
 
 
-def choose_instruments():
+def choose_instruments(args):
 
     sug0,sug1 = music.cool_inst_combo()
     do_sug = coinflip()
 
     # set inst 0
     print "Channel 0:",
-    if len(sys.argv) > 1 and sys.argv[1] != 'rnd':
-        inst0 = int(sys.argv[1])
+    if len(args) > 1 and args[1] != 'rnd':
+        inst0 = int(args[1])
         print "setting custom instrument", inst0
     elif do_sug:
         inst0 = sug0
@@ -370,8 +371,8 @@ def choose_instruments():
 
     # set inst 1
     print "Channel 1:",
-    if len(sys.argv) > 2:
-        inst1 = int(sys.argv[2])
+    if len(args) > 2:
+        inst1 = int(args[2])
         print "setting custom instrument", inst1
     elif do_sug:
         inst1 = sug1
