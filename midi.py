@@ -1137,6 +1137,7 @@ chorales = {
 
 'instruments I like (fluidR3 soundfont) ->'
 cool_instruments = {
+    0: 'piano',
     44: 'strings',
     68: 'woodwinds',
     70: 'bassoon', # goes well with 44 strings
@@ -1151,6 +1152,7 @@ cool_inst_combos = (
     (36, 104), # twangy lead with brassy pad
     (36,  73), # twangy lead with tremolo woodwind pad
     (10,  63), # bells and brassy pad
+    ( 0,   0), # piano and piano
 )
 def cool_inst_combo():
     return random.choice(cool_inst_combos)
