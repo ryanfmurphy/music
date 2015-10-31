@@ -59,8 +59,8 @@ def cBA_():
     parts = ('fed-', 'cdefe')
     return fns.some_parts(*parts)
 
-def aCF(): return 'CaCf' # leading hyphen means no pause
-def bDG(): return 'DbDg'
+def aCF(): return 'CaCf-'
+def bDG(): return 'DbDg-'
 def CEA():
     fns.chord_to(fns.options('D7', 'Am'))
     yield '-OABcAME'
@@ -99,6 +99,7 @@ def fga():
     else:
         raise ValueError("Unexpected random r value " + r)
 
+@fns.start_chord(lambda: fns.options('C','Am'))
 def cde():
     yield "def"
     yield "efg"
