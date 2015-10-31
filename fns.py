@@ -145,7 +145,7 @@ def play_fn_response_1(response, pause1=None):
 
 def process_chord_change():
     global chord, prev_chord
-    if chord != prev_chord:
+    if chord is not None:
         music.chordname_off(prev_chord, chan=1)
         music.chordname_on(chord, vel=CHORD_VEL, chan=1)
         print_chord(chord)
