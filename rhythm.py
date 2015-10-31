@@ -13,9 +13,11 @@ from getkey import getch, nb_getch, NonBlockingGetch
 import datetime, time
 from fractions import Fraction
 import midi
-try:                import my_db
-except ImportError: my_db = None
-#todo catch psycopg2.OperationalError
+
+try:
+    import my_db
+except ImportError:
+    my_db = None
 
 
 class Beat(object):
@@ -210,25 +212,31 @@ def listen_and_save():
         print(user_input)
         save = False
         if user_input in ('cut','shave'):
-            indexes = raw_input("Indexes (e.g. [:-1]): ")
+            indexes = raw_input("Enter a pythonic slice to take (e.g. [:-1]) : ")
             note_strn = eval('note_strn' + indexes)
             save = True
         if is_a_yes(user_input):
             save = True
         if save:
             result = save_melody_to_db(note_strn)
-            print("Saved (at least I think so!)")
         
 def is_a_yes(strn):
     return (strn.lower() in ('y','yes'))
 
 def save_melody_to_db(note_strn):
-    conn,cur = my_db.cur_db()
-    #result = cur.execute('INSERT INTO melody (melody) VALUES ($melody$'+note_strn+'$melody$);')
-    #cur.execute('PREPARE insert_melody AS INSERT INTO melody (melody) VALUES (?);')
-    result = cur.execute('INSERT INTO melody (melody) VALUES (%s);', (note_strn,))
-    conn.commit()
-    return result
+    if my_db:
+        conn,cur = my_db.cur_db(just_try=True)
+    else:
+        conn,cur = None,None
+    if conn and cur:
+        #result = cur.execute('INSERT INTO melody (melody) VALUES ($melody$'+note_strn+'$melody$);')
+        #cur.execute('PREPARE insert_melody AS INSERT INTO melody (melody) VALUES (?);')
+        result = cur.execute('INSERT INTO melody (melody) VALUES (%s);', (note_strn,))
+        conn.commit()
+        print("Saved (at least I think so!)")
+        return result
+    else:
+        print("Could not save to database")
 
 if __name__ == '__main__':
     listen_and_save()
