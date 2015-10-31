@@ -51,7 +51,3 @@ if __name__ == '__main__':
     play_loop()
     fns.console(env = env)
 
-#todo continuous octave streaming from one fn / yield to the next (or some option to do it)
-#todo only choose a new instrument if "new" is chosen as argv,
-    # else keep the existing ones
-
