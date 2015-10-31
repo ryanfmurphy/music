@@ -265,7 +265,7 @@ class MusicConsole(code.InteractiveConsole):
                 tree.body.append(print_node)
                 # play_whatever
                     #todo doesn't work for generators yet
-                play_whatever_node = ast_call_node('music.play_whatever', '_', show_notes=False)
+                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=False)
                 tree.body.append(play_whatever_node)
             #print ast.dump(tree)
             code_obj = compile(tree, '<input>', 'exec')
