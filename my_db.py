@@ -5,17 +5,26 @@ import wikipedia, socket
 from collections import namedtuple
 import config
 
-def conn_db():
+def conn_db(just_try=False):
     #return psycopg2.connect("dbname='murftown' user='murftown' password=''")
     dbname, username, password = config.db_info['dbname'], config.db_info['username'], config.db_info['password']
-    return psycopg2.connect("dbname='"+dbname+"' user='"+username+"' password='"+password+"'")
+    if just_try:
+        try:
+            return psycopg2.connect("dbname='"+dbname+"' user='"+username+"' password='"+password+"'")
+        except psycopg2.OperationalError:
+            return None
+    else:
+        return psycopg2.connect("dbname='"+dbname+"' user='"+username+"' password='"+password+"'")
 
-def cur_db():
-    conn = conn_db()
-    #cur = conn.cursor(cursor_factory = psycopg2.extras.DictCursor)
-    #cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    cur = conn.cursor()
-    return conn, cur
+def cur_db(just_try=False):
+    conn = conn_db(just_try)
+    if conn:
+        #cur = conn.cursor(cursor_factory = psycopg2.extras.DictCursor)
+        #cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+        cur = conn.cursor()
+        return conn, cur
+    else:
+        return None, None
 
 def table_names():
     conn,cur = cur_db()
@@ -317,5 +326,8 @@ def get_all_words(db=None, wheres=""):
     return fetch_tuples(cur, WordTuple)
     #return tuple(WordTuple(*row) for row in rows)
 
-build_tuple_models()
+try:
+    build_tuple_models()
+except psycopg2.OperationalError:
+    print "Error setting up db: Could not build_tuple_models()"
 
