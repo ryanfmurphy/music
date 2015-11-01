@@ -98,11 +98,16 @@ def get_fname(fn):
 
 def play_func(fn, do_response=None):
 
-    global chord
+    global chord, DURATION
 
     fname = get_fname(fn)
 
     if not is_lambda(fname):
+
+        # do start tempo change
+        start_dur = get_start_dur(fn)
+        if start_dur is not None:
+            DURATION = start_dur
 
         # do chord change if any
         start_chord = get_start_chord(fn)
@@ -167,6 +172,10 @@ def get_start_chord(fn):
             return fn.chord()
         else:
             return fn.chord
+
+def get_start_dur(fn):
+    if hasattr(fn, 'duration'):
+        return fn.duration
 
 def chord_offset():
     return RESPONSE_OFFSET / 2
@@ -401,9 +410,14 @@ def play_id(strn):
 # the start_chord decorator
 def start_chord(the_chord):
     def outer(func):
-        #def inner(*args, **kwargs):
-        #    return func(*args, **kwargs)
         func.chord = the_chord
+        return func
+    return outer
+
+# the start_chord decorator
+def start_dur(dur):
+    def outer(func):
+        func.duration = dur
         return func
     return outer
 
