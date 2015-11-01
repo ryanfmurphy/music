@@ -773,56 +773,58 @@ def close_1_big_interval(n, prev):
     return n
 
 
-def close_big_intervals(nums):
+def close_big_intervals(nums, prev_pitch=None):
     '''
     change octaves to close up any gaps bigger than say an octave
     used by strn2pitches to allow the octave-wrapping letter case semantics
     '''
-    prev = None
     for n in nums:
-        n = close_1_big_interval(n, prev)
+        n = close_1_big_interval(n, prev_pitch)
         yield n
-        if n not in ['-',' ']: prev = n
+        if n not in ['-',' ']: prev_pitch = n
 
 
-def close_big_intervals_interactive():
+def close_big_intervals_interactive(prev_pitch = None):
     'just like close_big_intervals but you have to .send it the nums and you instantly get the next yield'
-    prev = None
     n = None
     while True:
         n = yield n
         if n is None: return
-        n = close_1_big_interval(n, prev)
+        n = close_1_big_interval(n, prev_pitch)
         #todo #fixme should this next line be above?
-        if n not in ['-',' ']: prev = n
+        if n not in ['-',' ']: prev_pitch = n
 
 def strn2numbers(strn):
     return (note_numbers[ch] for ch in strn)
 
-def strn2pitches(strn):
-    return close_big_intervals(strn2numbers(strn))
+def strn2pitches(strn, prev_pitch=None):
+    return close_big_intervals(strn2numbers(strn), prev_pitch)
 
 SHOW_NOTES = True
 
 def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
-                show_notes=None):
+                show_notes=None, prev_pitch=None):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     return eventsg(
-        strn2pitches(strn), dur=dur, leave_sounding=leave_sounding,
+        strn2pitches(strn, prev_pitch), dur=dur, leave_sounding=leave_sounding,
         show_notes=show_notes,
     )
 
 estrn = eventsg_strn
 
-def play_strn(strn, dur=DURATION, leave_sounding=False, show_notes=None):
+def play_strn(strn, dur=DURATION, leave_sounding=False,
+              show_notes=None, prev_pitch=None):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     if strn is None:
         return None
     else:
-        playe(eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
-              show_notes=show_notes))
+        # playe returns the last pitch for continuity with subsequent melodies
+        return playe(
+            eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
+                         show_notes=show_notes, prev_pitch=prev_pitch)
+        )
 
 def strn_note_on(ch):
     pitch = note_numbers[ch]
@@ -1046,12 +1048,22 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
 def playe(events, silence_on_abort = False):
     if silence_on_abort:
         try:
-            playe(events, silence_on_abort = False)
+            return playe(events, silence_on_abort = False)
         except KeyboardInterrupt:
             panic()
     else:
+        last_pitch = None
         for e in events:
+            # get pitch from last note_on event
+            possible_pitch = get_lispy_funcall_pitch(e)
+            if possible_pitch is not None: last_pitch = possible_pitch
+            # exec actual funcall
             lispy_funcall(e, env=globals())
+        return last_pitch
+
+def get_lispy_funcall_pitch(e):
+    if e[0] == 'note_on':
+        return e[1]
 
 '-- Fri Jun 5 2015 --'
 
