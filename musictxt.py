@@ -140,15 +140,15 @@ def cdeg():
         yield "edcA"
         yield "GAFG"
         yield "EGcB"
-        fns.chord_to('Am')
+        fns.chord = 'Am'
         yield "cAEG"
-        fns.chord_to('D')
+        fns.chord = 'D'
         yield "MAdr"
-        fns.chord_to('G')
+        fns.chord = 'G'
         yield "dBGB"
-        fns.chord_to('E7')
+        fns.chord = 'E7'
         yield "OBed"
-        fns.chord_to('Am')
+        fns.chord = 'Am'
         yield "c-A-"
 
 def _EDE():
@@ -169,15 +169,21 @@ def gedc():
     return 'AcdeA-A-'
 
 def fedc():
-    fns.chord_to(fns.options('Fm','Fm7','F minor major 7','Dm7b5', 'Bb7'))
-    yield 'ogf'
-    yield 'goC'
-    if fns.chord in ('Fm7', 'Bb7'):
+    fns.chord = fns.options('Fm', 'Fm7', 'F minor major 7', 'Dm7b5', 'Bb7', 'Ab', 'Abmaj7')
+    yield 'ogfgoC'
+    
+    # decide flat3
+    if fns.sounding_chord in ('Fm7', 'Ab', 'Abmaj7'):
+        flat3 = True
+    elif fns.sounding_chord in ('F minor major 7',):
+        flat3 = False
+    else:
+        flat3 = fns.options(True,False)
+    
+    if flat3:
         yield 'DSDoC--'
     else:
         yield 'DEDoC--'
-    if fns.coinflip():
-        fns.chord_to(fns.options('F','Dm','C','Em7'))
 
 def gbDEFESEG_EE_D__():
     fns.chord_to('Fmaj7')
@@ -205,21 +211,22 @@ def Cbag():
     yield 'a---'
 
 def efede():
-    speed = fns.options(.3,.2,.1)
-    fns.change_duration(speed)
+    dur = fns.options(.3,.25,.2,.15,.1)
+    fns.change_duration(dur)
 
 def edcAc_A():
     fns.chord_to('Am')
     return 'f--edcAAA'
 
 def gagededc():
-    fns.chord_to('Am')
+    fns.chord = 'Am'
     return '-cdceedc'
 
 def aaaCb_a_():
     fns.chord_to('D7')
     return 'AAAcdeg-'
 
+@fns.start_chord('Cm')
 def gcccsd_c():
     fns.chord_to('Cm')
     yield '-cccsfgH'
@@ -230,12 +237,70 @@ def gcccsd_c():
     fns.chord_to('Fm')
     yield '-ogf-s-c'
     yield '-dsH-G--'
-gcccsd_c.chord = 'Cm'
+
+@fns.start_chord('C')
+def c_eg():
+    fns.chord = 'F'
+    yield 'f-a'
+    fns.chord = 'G'
+    yield 'g-_Bd'
+    fns.chord = 'F'
+    yield 'ffed'
+    fns.chord = 'C'
+    yield 'c-eg'
+    fns.chord = 'F'
+    yield 'f-a'
+    fns.chord = 'G'
+    yield 'g----'
+    fns.chord = 'F'
+    yield '----'
+
+def edcd():
+    fns.chord = 'Am'
+    yield 'e-dc'
+    fns.chord = 'G'
+    yield 'B-AG'
+    fns.chord = 'F'
+    yield 'FGAc'
+    fns.chord = 'Em'
+    yield 'B-AG'
+    fns.chord = 'F'
+    yield 'FGAc'
+    fns.chord = 'G7'
+    yield 'B-AG'
+    fns.chord = 'C'
+    yield 'cB'
+    fns.chord = 'C7'
+    yield 'cG'
+    fns.chord = 'F'
+    yield 'A---'
+
+
+@fns.start_chord('Bm7b5')
+@fns.start_dur(midi.swung_dur(.4,.2).next)
+def eses():
+    fns.chord = 'E7'
+    yield 'eged'
+    fns.chord = 'Gm7'
+    yield '-Hdf'
+    fns.chord = 'Gm7'
+    yield 'a-'
+    fns.chord = 'C7'
+    yield 'ge'
+    fns.chord = 'Fmaj7'
+    yield '-Ace'
+    fns.chord = 'Fm7'
+    yield 'g-'
+    fns.chord = 'Bb7'
+    yield 'fd'
+    fns.chord = 'Ebmaj7'
+    yield '--------'
+    fns.DURATION = .2
     
 
 if __name__ == '__main__':
     env = globals()
-    #names = ('gcccsd_c', 'daaaCb_a', 'gagededc', 'edcAc_A')
+    #names = ('c_eg','edcd','fedc','eses')
     #env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
