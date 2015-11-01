@@ -159,7 +159,7 @@ def _EDE():
         yield "SDCa"
     yield "gsdc"
     fns.chord_to(fns.options('D7','Dm7','Gm7'))
-    yield "A-_aCD-a"
+    yield "a-_Acd-A"
     fns.chord_to(fns.options('Am7','Gm7'))
     #yield None
 
@@ -224,11 +224,11 @@ def gcccsd_c():
     fns.chord_to('Cm')
     yield '-cccsfgH'
     fns.chord_to('Bb')
-    yield '-hhhDSFO'
+    yield '-HHHdsfO'
     fns.chord_to('Ab')
-    yield '-oooCDSG'
+    yield '-OOOcdsg'
     fns.chord_to('Fm')
-    yield '-OGF-S-C'
+    yield '-ogf-s-c'
     yield '-dsH-G--'
 gcccsd_c.chord = 'Cm'
     
