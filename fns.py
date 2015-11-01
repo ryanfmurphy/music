@@ -114,7 +114,7 @@ def play_func(fn, do_response=None):
         print_fname(fname)
         fname = fname2mus_strn(fname)
         pause1 = pause_amt()
-        play_strn(
+        last_pitch = play_strn(
             with_pause_after(fname, pause1),
             show_notes = False,
             dur = DURATION,
@@ -124,18 +124,19 @@ def play_func(fn, do_response=None):
         if do_response is None:
             do_response = True #coinflip()
         if do_response:
-            play_fn_response(fn, pause1=pause1)
+            play_fn_response(fn, pause1=pause1, prev_pitch=last_pitch)
 
-def play_fn_response(fn, pause1=None):
+def play_fn_response(fn, pause1=None, prev_pitch=None):
     if is_function(fn):
         response = fn()
         if isinstance(response, types.GeneratorType):
             for section in response:
-                play_fn_response_1(section, pause1=pause1)
+                new_prev_pitch = play_fn_response_1(section, pause1, prev_pitch)
+                prev_pitch = new_prev_pitch
         else:
-            play_fn_response_1(response, pause1=pause1)
+            play_fn_response_1(response, pause1, prev_pitch)
 
-def play_fn_response_1(response, pause1=None):
+def play_fn_response_1(response, pause1=None, prev_pitch=None):
     process_chord_change()
     print_response(response)
     response = str2mus_strn(response)
@@ -143,10 +144,11 @@ def play_fn_response_1(response, pause1=None):
     pause2 = pause_amt(at_least = pause1)
     response = with_pause_after(response, pause2)
 
-    play_strn(
+    return play_strn(
         response,
         show_notes = False,
         dur = DURATION, 
+        prev_pitch = prev_pitch,
     )
 
 def process_chord_change():
