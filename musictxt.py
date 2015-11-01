@@ -279,6 +279,7 @@ def edcd():
 @fns.start_chord('Bm7b5')
 @fns.start_dur(midi.swung_dur(.4,.2).next)
 def eses():
+    fns.choose_instruments(['rnd'])
     fns.chord = 'E7'
     yield 'eged'
     fns.chord = 'Gm7'
@@ -299,9 +300,9 @@ def eses():
     
 
 if __name__ == '__main__':
-    env = globals()
-    #names = ('c_eg','edcd','fedc','eses')
-    #env = fns.take_from_env(names, globals())
+    #env = globals()
+    names = ('c_eg','edcd','fedc','eses')
+    env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
     fns.console(env = env)
