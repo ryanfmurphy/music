@@ -803,18 +803,22 @@ def strn2pitches(strn, prev_pitch=None):
 SHOW_NOTES = True
 
 def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
-                show_notes=None, prev_pitch=None):
+                 show_notes=None, prev_pitch=None,
+                 vel=VELOCITY):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     return eventsg(
-        strn2pitches(strn, prev_pitch), dur=dur, leave_sounding=leave_sounding,
+        strn2pitches(strn, prev_pitch),
+        dur=dur, vel=vel,
+        leave_sounding=leave_sounding,
         show_notes=show_notes,
     )
 
 estrn = eventsg_strn
 
 def play_strn(strn, dur=DURATION, leave_sounding=False,
-              show_notes=None, prev_pitch=None):
+              show_notes=None, prev_pitch=None,
+              vel=VELOCITY):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     if strn is None:
@@ -822,8 +826,13 @@ def play_strn(strn, dur=DURATION, leave_sounding=False,
     else:
         # playe returns the last pitch for continuity with subsequent melodies
         return playe(
-            eventsg_strn(strn, dur=dur, leave_sounding=leave_sounding,
-                         show_notes=show_notes, prev_pitch=prev_pitch)
+            eventsg_strn(strn,
+                         dur=dur,
+                         leave_sounding=leave_sounding,
+                         show_notes=show_notes,
+                         prev_pitch=prev_pitch,
+                         vel=vel,
+            )
         )
 
 def strn_note_on(ch):

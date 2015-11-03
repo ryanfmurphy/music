@@ -125,6 +125,7 @@ def play_func(fn, do_response=None):
             with_pause_after(fname, pause1),
             show_notes = False,
             dur = DURATION,
+            vel = MEL_VEL,
         )
 
         # maybe run function and play response
@@ -156,6 +157,7 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
         show_notes = False,
         dur = DURATION, 
         prev_pitch = prev_pitch,
+        vel = MEL_VEL,
     )
 
 def process_chord_change():
@@ -210,7 +212,6 @@ def some_end_parts(*parts):
 def goof_around(env):
     try:
         while True:
-            #music.play_strn(cefg())
             play_funcs(env)
     except KeyboardInterrupt:
         print "Bye!"
@@ -411,7 +412,7 @@ def mult_duration(durmult):
     DURATION *= durmult
 
 def play_id(strn):
-    play_strn(fname2mus_strn(strn), show_notes=False)
+    play_strn(fname2mus_strn(strn), show_notes=False, vel=MEL_VEL)
 
 # the start_chord decorator
 def start_chord(the_chord):
