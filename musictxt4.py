@@ -1,13 +1,13 @@
 import midi, random, pdb, musictxt
 import fns as f, subprocess as sp
 
+f.MEL_VEL = 100
+f.CHORD_VEL = 70
+
 f.SOMETIMES_DELAY = False
 f.INSTRUMENTS = (24, 49)
 #f.INSTRUMENTS = (61, 73)
 f.DURATION = .1
-
-f.MEL_VEL = 127
-f.CHORD_VEL = 70
 
 @f.start_chord('Am')
 def cde():
