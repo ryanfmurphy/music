@@ -3,11 +3,13 @@ from isness import *
 import types, random, code, ast, _ast, readline, os, atexit
 import music
 
-CHORD_VEL = 65
+MEL_VEL = 110
+CHORD_VEL = 95
 RESPONSE_OFFSET = 30
 DURATION = .2 #music.swung_dur(.4,.2).next
 SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
+INSTRUMENTS = None
 
 chord = None
 sounding_chord = None
@@ -51,7 +53,7 @@ def maybe_delay():
         delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        play_strn(delay, show_notes=False)
+        play_strn(delay, show_notes=False, vel=MEL_VEL)
 
 def pause_amt(at_least=1):
     global PAUSE_DISABLED
@@ -356,7 +358,11 @@ def console(env):
 def setup():
     # need to give some arg or it won't change instruments, "rnd" to randomly choose
     if len(sys.argv) > 1:
-        choose_instruments(sys.argv)
+        print "Choosing Instruments from args"
+        choose_instruments(sys.argv[1:])
+    elif INSTRUMENTS:
+        print "Choosing Instruments from INSTRUMENTS setting"
+        choose_instruments(INSTRUMENTS)
     else:
         print "Leaving instruments the same"
 
@@ -368,8 +374,8 @@ def choose_instruments(args):
 
     # set inst 0
     print "Channel 0:",
-    if len(args) > 1 and args[1] != 'rnd':
-        inst0 = int(args[1])
+    if len(args) > 0 and args[0] != 'rnd':
+        inst0 = int(args[0])
         print "setting custom instrument", inst0
     elif do_sug:
         inst0 = sug0
@@ -382,8 +388,8 @@ def choose_instruments(args):
 
     # set inst 1
     print "Channel 1:",
-    if len(args) > 2:
-        inst1 = int(args[2])
+    if len(args) > 1:
+        inst1 = int(args[1])
         print "setting custom instrument", inst1
     elif do_sug:
         inst1 = sug1
