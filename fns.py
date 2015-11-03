@@ -1,7 +1,6 @@
-from music import *
+import midi
 from isness import *
-import types, random, code, ast, _ast, readline, os, atexit
-import music
+import types, random, code, ast, _ast, readline, sys, os, atexit
 
 MEL_VEL = 110
 CHORD_VEL = 95
@@ -53,7 +52,7 @@ def maybe_delay():
         delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        play_strn(delay, show_notes=False, vel=MEL_VEL)
+        midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
 
 def pause_amt(at_least=1):
     global PAUSE_DISABLED
@@ -121,7 +120,7 @@ def play_func(fn, do_response=None):
         print_fname(fname)
         fname = fname2mus_strn(fname)
         pause1 = pause_amt()
-        last_pitch = play_strn(
+        last_pitch = midi.play_strn(
             with_pause_after(fname, pause1),
             show_notes = False,
             dur = DURATION,
@@ -152,7 +151,7 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
     pause2 = pause_amt(at_least = pause1)
     response = with_pause_after(response, pause2)
 
-    return play_strn(
+    return midi.play_strn(
         response,
         show_notes = False,
         dur = DURATION, 
@@ -164,8 +163,8 @@ def process_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            music.chordname_off(sounding_chord, chan=1)
-        music.chordname_on(chord, vel=CHORD_VEL, chan=1)
+            midi.chordname_off(sounding_chord, chan=1)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1)
         print_chord(chord)
         sounding_chord = chord
         chord = None
@@ -215,7 +214,7 @@ def goof_around(env):
             play_funcs(env)
     except KeyboardInterrupt:
         print "Bye!"
-        music.panic()
+        midi.panic()
 
 def take_from_env(names, env):
     return {name: env[name] for name in names}
@@ -353,7 +352,7 @@ def console(env):
         console = MusicConsole(env)
         console.interact()
     except KeyboardInterrupt:
-        music.panic()
+        midi.panic()
         print "See ya!"
 
 def setup():
@@ -370,7 +369,7 @@ def setup():
 
 def choose_instruments(args):
 
-    sug0,sug1 = music.cool_inst_combo()
+    sug0,sug1 = midi.cool_inst_combo()
     do_sug = coinflip()
 
     # set inst 0
@@ -382,10 +381,10 @@ def choose_instruments(args):
         inst0 = sug0
         print "known cool instrument combo", inst0
     else: 
-        inst0 = music.rand_inst(chan=0)
+        inst0 = midi.rand_inst(chan=0)
         print "experimental random instrument", inst0
     # actually changes patch
-    music.midi_program_change(inst0, chan=0)
+    midi.midi_program_change(inst0, chan=0)
 
     # set inst 1
     print "Channel 1:",
@@ -396,10 +395,10 @@ def choose_instruments(args):
         inst1 = sug1
         print "known cool instrument combo", inst1
     else:
-        inst1 = music.rand_inst(chan=1)
+        inst1 = midi.rand_inst(chan=1)
         print "experimental random instrument", inst1
     # actually changes patch
-    music.midi_program_change(inst1, chan=1)
+    midi.midi_program_change(inst1, chan=1)
 
 def change_duration(dur):
     global DURATION
@@ -412,7 +411,7 @@ def mult_duration(durmult):
     DURATION *= durmult
 
 def play_id(strn):
-    play_strn(fname2mus_strn(strn), show_notes=False, vel=MEL_VEL)
+    midi.play_strn(fname2mus_strn(strn), show_notes=False, vel=MEL_VEL)
 
 # the start_chord decorator
 def start_chord(the_chord):

@@ -1,6 +1,7 @@
-import midi, random, fns, pdb, musictxt
+import music, random, pdb, musictxt
+import music.fns as fns
 
-#fns.DURATION = midi.swung_dur(.3,.15).next
+#fns.DURATION = music.swung_dur(.3,.15).next
 fns.SOMETIMES_DELAY = False
 
 def __f__d__A__GA___():

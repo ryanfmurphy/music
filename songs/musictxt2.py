@@ -1,8 +1,8 @@
-import midi, random, pdb, musictxt
-import fns as f
+import music, random, pdb, musictxt
+import music.fns as f
 
 f.MEL_VEL = 127
-f.DURATION = midi.swung_dur(.3,.15).next
+f.DURATION = music.swung_dur(.3,.15).next
 f.SOMETIMES_DELAY = False
 f.INSTRUMENTS = (24, 49)
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 f.play_func( g__edc__ )
                 f.play_func( fedcAcee )
         except KeyboardInterrupt:
-            midi.panic()
+            music.panic()
             
     env = globals()
     f.setup()

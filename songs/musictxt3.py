@@ -1,5 +1,5 @@
-import midi, random, pdb, musictxt
-import fns as f, subprocess as sp
+import random, pdb
+import music.fns as f, subprocess as sp
 
 f.MEL_VEL = 100
 f.CHORD_VEL = 70

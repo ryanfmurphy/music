@@ -1,4 +1,5 @@
-import midi, random, fns, pdb, musictxt
+import random, pdb, musictxt
+import music.fns as fns
 
 fns.DURATION = .3
 #fns.DURATION = midi.swung_dur(.3,.15).next

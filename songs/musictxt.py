@@ -1,4 +1,5 @@
-import midi, random, fns, pdb, musictxt
+import music, random, pdb
+import music.fns as fns
 
 #fns.PAUSE_DISABLED = False
 
@@ -277,7 +278,7 @@ def edcd():
 
 
 @fns.start_chord('Bm7b5')
-@fns.start_dur(midi.swung_dur(.4,.2).next)
+@fns.start_dur(music.swung_dur(.4,.2).next)
 def eses():
     fns.choose_instruments(['rnd'])
     fns.chord = 'E7'
