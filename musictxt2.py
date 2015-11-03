@@ -1,53 +1,56 @@
-import midi, random, fns, pdb, musictxt
+import midi, random, pdb, musictxt
+import fns as f
 
-fns.DURATION = midi.swung_dur(.3,.15).next
-fns.SOMETIMES_DELAY = False
+f.MEL_VEL = 127
+f.DURATION = midi.swung_dur(.3,.15).next
+f.SOMETIMES_DELAY = False
+f.INSTRUMENTS = (24, 49)
 
 '''
 def cde():
     yield 'def'
     yield 'efg'
-    if fns.coinflip():
+    if f.coinflip():
         yield 'fga'
-        fns.chord = 'F'
+        f.chord = 'F'
         yield 'gab'
         yield 'abC'
-        fns.chord = 'G'
+        f.chord = 'G'
         yield 'bCD'
-        fns.chord = 'C'
+        f.chord = 'C'
         yield 'C--'
     else:
         yield 'fed'
-        fns.chord = 'Dm'
+        f.chord = 'Dm'
         yield 'edc'
-        fns.chord = 'G'
+        f.chord = 'G'
         yield 'dcB'
-        fns.chord = 'C'
+        f.chord = 'C'
         yield 'c-----'
 cde.chord = 'C'
 '''
 
-@fns.start_chord('C')
+@f.start_chord('C')
 def g__edc__():
     yield 'efmgec--'
 
-@fns.start_chord('Fmaj7')
+@f.start_chord('Fmaj7')
 def fedcAcee():
-    fns.chord = 'D7'
+    f.chord = 'D7'
     yield '-d------'
 
 if __name__ == '__main__':
     def play_loop():
         try: 
             while True:
-                fns.play_func( g__edc__ )
-                fns.play_func( fedcAcee )
+                f.play_func( g__edc__ )
+                f.play_func( fedcAcee )
         except KeyboardInterrupt:
             midi.panic()
             
     env = globals()
-    fns.setup()
-    #fns.goof_around(env)
+    f.setup()
+    #f.goof_around(env)
     play_loop()
-    fns.console(env = env)
+    f.console(env = env)
 
