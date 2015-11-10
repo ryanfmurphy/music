@@ -366,15 +366,15 @@ def setup():
     else:
         print "Leaving instruments the same"
 
-INST0 = 19
-INST1 = 0
+#INST0 = 19
+#INST1 = 0
 
 def choose_instruments(args): #todo clean up / simplify
-    global INST0, INST1
-    INST0 += 1
-    midi.midi_program_change(INST0, chan=0)
-    print (INST0, INST1)
-    return
+    #global INST0, INST1
+    #INST0 += 1
+    #midi.midi_program_change(INST0, chan=0)
+    #print (INST0, INST1)
+    #return
 
     sug0,sug1 = midi.cool_inst_combo()
     do_sug = coinflip()
