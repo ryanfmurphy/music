@@ -366,39 +366,47 @@ def setup():
     else:
         print "Leaving instruments the same"
 
+INST0 = 19
+INST1 = 0
 
-def choose_instruments(args):
+def choose_instruments(args): #todo clean up / simplify
+    global INST0, INST1
+    INST0 += 1
+    midi.midi_program_change(INST0, chan=0)
+    print (INST0, INST1)
+    return
 
     sug0,sug1 = midi.cool_inst_combo()
     do_sug = coinflip()
 
     # set inst 0
-    print "Channel 0:",
     if len(args) > 0 and args[0] != 'rnd':
         inst0 = int(args[0])
-        print "setting custom instrument", inst0
     elif do_sug:
         inst0 = sug0
-        print "known cool instrument combo", inst0
     else: 
         inst0 = midi.rand_inst(chan=0)
-        print "experimental random instrument", inst0
-    # actually changes patch
-    midi.midi_program_change(inst0, chan=0)
 
     # set inst 1
-    print "Channel 1:",
     if len(args) > 1:
         inst1 = int(args[1])
-        print "setting custom instrument", inst1
     elif do_sug:
         inst1 = sug1
-        print "known cool instrument combo", inst1
     else:
         inst1 = midi.rand_inst(chan=1)
-        print "experimental random instrument", inst1
-    # actually changes patch
+
+    # description
+    if len(args) > 0:   
+        print "setting custom instruments", (inst0, inst1)
+    elif do_sug:
+        print "known cool instrument combo", (inst0, inst1)
+    else:
+        print "experimental random instrument", (inst0, inst1)
+
+    # actually changes patches
+    midi.midi_program_change(inst0, chan=0)
     midi.midi_program_change(inst1, chan=1)
+
 
 def change_duration(dur):
     global DURATION
