@@ -1,6 +1,7 @@
 import midi
 from isness import *
 import types, random, code, ast, _ast, readline, sys, os, atexit
+from strict_typing import types as typerule
 
 MEL_VEL = 110
 CHORD_VEL = 95
@@ -14,12 +15,13 @@ chord = None
 sounding_chord = None
 
 # change the chord to the_chord only if it's not already
+@typerule(the_chord=str)
 def chord_to(the_chord):
     global chord, sounding_chord
     if the_chord != sounding_chord:
         chord = the_chord
 
-
+@typerule(assumption=str)
 def under_assumption(assumption):
     if assumption == 'working with strings':
         return True
@@ -29,6 +31,7 @@ def under_assumption(assumption):
 def options(*things):
     return random.choice(things)
 
+@typerule(env=dict, _ret_type=dict)
 def get_funcs(env):
     return {k:v for k,v in env.items()
             if is_function(v)}
@@ -54,6 +57,7 @@ def maybe_delay():
         delay = '-' * delay_len
         midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
 
+@typerule(at_least=int, _ret_type=int)
 def pause_amt(at_least=1):
     global PAUSE_DISABLED
     if PAUSE_DISABLED:
@@ -70,6 +74,7 @@ def with_pause_after(mel, pause=None):
     else:
         return None
 
+#@typerule(strn=str|None, _ret_type=str)
 def str2mus_strn(strn):
     if is_string(strn):
         # get rid of weird characters
@@ -78,16 +83,20 @@ def str2mus_strn(strn):
     else:
         return strn
 
+@typerule(fname=str, _ret_type=str)
 def fname2mus_strn(fname):
     strn = fname.replace('_','-')
     return str2mus_strn(strn)
 
+@typerule(fname=str)
 def print_fname(fname):
     print fname + '()'
 
 def print_response(response):
     if is_string(response):
         print ' '*RESPONSE_OFFSET + str(response)
+    else:
+        pass
 
 
 def get_fname(fn):
