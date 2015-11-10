@@ -63,6 +63,7 @@ def cBA_():
 def aCF(): return 'CaCf-'
 def bDG(): return 'DbDg-'
 def CEA():
+    fns.choose_instruments(['rnd'])
     fns.chord_to(fns.options('D7', 'Am'))
     yield '-OABcAME'
     #fns.chord_to(fns.options('D7', 'Am'))
@@ -71,6 +72,7 @@ def CEA():
     yield 'D-D---'
 
 def edc():
+    fns.choose_instruments(['rnd'])
     if fns.coinflip():
         fns.chord_to(fns.options('Dm', 'G'))
         return 'defg---'
@@ -79,12 +81,14 @@ def edc():
         return 'efg'
 
 def abC():
+    fns.choose_instruments(['rnd'])
     if fns.coinflip():
         return 'b-a-g---'
     else:
         return 'b-g-e---'
 
 def fga():
+    fns.choose_instruments(['rnd'])
     r = random.randint(1,4)
     if r==1:
         fns.chord_to(fns.options('D7', 'F#m7b5', 'B7'))
@@ -102,6 +106,7 @@ def fga():
 
 @fns.start_chord(lambda: fns.options('C','Am'))
 def cde():
+    fns.choose_instruments(['rnd'])
     yield "def"
     yield "efg"
     yield "fga"
@@ -115,6 +120,7 @@ def cde():
 
 #todo fix the octaves of the incremental yields
 def cdeg():
+    fns.choose_instruments(['rnd'])
     if fns.coinflip():
         fns.chord_to('F')
         yield "agfa"
@@ -153,6 +159,7 @@ def cdeg():
         yield "c-A-"
 
 def _EDE():
+    fns.choose_instruments(['rnd'])
     fns.chord_to(fns.options('F7','Fm7','D7'))
     if fns.chord == 'Fm7':
         yield "SDCo"
@@ -165,11 +172,13 @@ def _EDE():
     #yield None
 
 def gedc():
+    fns.choose_instruments(['rnd'])
     if fns.coinflip():
         fns.chord_to(fns.options('Am','Am7','F','Fmaj7','Dm','Dm7','D7',))
     return 'AcdeA-A-'
 
 def fedc():
+    fns.choose_instruments(['rnd'])
     fns.chord = fns.options('Fm', 'Fm7', 'F minor major 7', 'Dm7b5', 'Bb7', 'Ab', 'Abmaj7')
     yield 'ogfgoC'
     
@@ -202,6 +211,7 @@ def abCD():
         yield melpart
 
 def Cbag():
+    fns.choose_instruments(['rnd'])
     fns.chord_to('D7')
     yield 'mEDC'
     fns.chord_to('G7')
@@ -229,6 +239,7 @@ def aaaCb_a_():
 
 @fns.start_chord('Cm')
 def gcccsd_c():
+    fns.choose_instruments(['rnd'])
     fns.chord_to('Cm')
     yield '-cccsfgH'
     fns.chord_to('Bb')
@@ -239,8 +250,10 @@ def gcccsd_c():
     yield '-ogf-s-c'
     yield '-dsH-G--'
 
+''' la bamba
 @fns.start_chord('C')
 def c_eg():
+    fns.choose_instruments(['rnd'])
     fns.chord = 'F'
     yield 'f-a'
     fns.chord = 'G'
@@ -255,8 +268,10 @@ def c_eg():
     yield 'g----'
     fns.chord = 'F'
     yield '----'
+'''
 
 def edcd():
+    fns.choose_instruments(['rnd'])
     fns.chord = 'Am'
     yield 'e-dc'
     fns.chord = 'G'
@@ -301,9 +316,9 @@ def eses():
     
 
 if __name__ == '__main__':
-    #env = globals()
-    names = ('c_eg','edcd','fedc','eses')
-    env = fns.take_from_env(names, globals())
+    env = globals()
+    #names = ('c_eg','edcd','fedc','eses')
+    #env = fns.take_from_env(names, globals())
     fns.setup()
     fns.goof_around(env)
     fns.console(env = env)

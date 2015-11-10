@@ -46,7 +46,7 @@ def EFEFEDE_b_g_():
 def GAGADBG_b_g_():
     return 'ababaga-E-E-'
 
-exec(sp.check_output(['php', 'music_fns.py.php']))
+#exec(sp.check_output(['php', 'music_fns.py.php']))
 
 if __name__ == '__main__':
     env = globals()
