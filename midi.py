@@ -1594,10 +1594,12 @@ def is_pure_chord(pitches, root, chord_quality):
 
 
 
+'''
 home_dir = '/Users/murftown/'
 with open(home_dir + 'git1/songs/when today becomes tomorrow') as fh:
     when_today_becomes_tomorrow = fh.read() \
         .replace('\n','')
+'''
 
 
 
