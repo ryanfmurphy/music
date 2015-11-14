@@ -6,6 +6,8 @@
 
 #todo running avg function
 
+#todo people new getkey stuff
+
 '''
 
 from __future__ import print_function
