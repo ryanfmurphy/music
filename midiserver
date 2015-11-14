@@ -1,0 +1,5 @@
+#!/bin/bash
+set -v
+SFPATH="/Users/murftown/dev/GeneralUser GS 1.44 FluidSynth"
+#fluidsynth -d "$SFPATH/GeneralUser GS FluidSynth v1.44.sf2"
+fluidsynth -d "$SFPATH/FluidR3 GM2-2.SF2"
