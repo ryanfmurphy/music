@@ -18,10 +18,10 @@ Setup
 
 * Clone this repo
 * Install fluidsynth (or have a working midi synth running on your computer that you can send midi messages to)
-* Install the `rtmidi` library
-* Use the `music` library
+* Install the `rtmidi` library: http://trac.chrisarndt.de/code/wiki/python-rtmidi/install%20
 
-Examples
+Usage
 --------
-Coming soon
+* Use the `music` module
+* Examples coming soon
 
