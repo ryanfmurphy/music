@@ -12,3 +12,16 @@ Stay tuned for more information about this project.
 
 ~ Ryan
 
+
+Setup
+-----
+
+* Clone this repo
+* Install fluidsynth (or have a working midi synth running on your computer that you can send midi messages to)
+* Install the `rtmidi` library
+* Use the `music` library
+
+Examples
+--------
+Coming soon
+
