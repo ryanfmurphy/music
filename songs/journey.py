@@ -1,18 +1,20 @@
 import music.fns as f
+import music.midi as midi
 
 f.MEL_VEL = 100
 f.CHORD_VEL = 70
 f.SOMETIMES_DELAY = False
+f.INSTRUMENTS = (24,49)
 
-f.DURATION = .3
+f.DURATION = midi.swung_dur(.18,.12).next
 
 @f.start_chord('C')
 def cdefgfga():
-    f.chord_to('Bb')
+    f.chord_to('Bblyd')
     yield 'h-dh'
     f.chord_to('F')
     yield 'afcA'
-    f.chord_to('C')
+    f.chord_to('Csus')
     yield 'fecGFEc--GAcegbC'
     f.chord_to('C')
     yield 'EG ECgec'
@@ -20,7 +22,7 @@ def cdefgfga():
     yield 'hDhf'
     f.chord_to('F')
     yield 'afcA'
-    f.chord_to('C')
+    f.chord_to('Gsus')
     yield 'cdeC-eC-'
     f.chord_to('Am')
     yield 'edcAcdee'
@@ -29,7 +31,7 @@ def cdefgfga():
 def cH_cd_Hd():
     f.chord_to(f.options('Bb','Gm'))
     yield 'ef--'
-    f.chord_to('F')
+    f.chord_to(f.options('F','Dm'))
     yield '-fgh'
     f.chord_to('C')
     yield 'C--gChgf-fefgfeH'
