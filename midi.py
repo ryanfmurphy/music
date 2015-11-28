@@ -1499,6 +1499,32 @@ chordtxt = {
     'Asus': 'aDE',
     'Bbsus': 'hSF',
     'Bsus': 'bEM',
+
+    'C lydian': 'cemg',
+    'Db lydian': 'rfgo',
+    'D lydian': 'dmoa',
+    'Eb lydian': 'sgah',
+    'E lydian': 'eohb',
+    'F lydian': 'fabC',
+    'F# lydian': 'mhCR',
+    'G lydian': 'gbRD',
+    'Ab lydian': 'oCDS',
+    'A lydian': 'aRSE',
+    'Bb lydian': 'hDEF',
+    'B lydian': 'bSFM',
+
+    'Clyd': 'cemg',
+    'Dblyd': 'rfgo',
+    'Dlyd': 'dmoa',
+    'Eblyd': 'sgah',
+    'Elyd': 'eohb',
+    'Flyd': 'fabC',
+    'F#lyd': 'mhCR',
+    'Glyd': 'gbRD',
+    'Ablyd': 'oCDS',
+    'Alyd': 'aRSE',
+    'Bblyd': 'hDEF',
+    'Blyd': 'bSFM',
 }
 
 chord_progressions = [
