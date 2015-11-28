@@ -19,6 +19,8 @@ Setup
 * Clone this repo
 * Install fluidsynth (or have a working midi synth running on your computer that you can send midi messages to)
 * Install the `rtmidi` library: http://trac.chrisarndt.de/code/wiki/python-rtmidi/install%20
+	* Python Dev Headers and Libraries
+	* On Linux, Jack Server and Dev Packages - `jackd2` and `jackd2-dev`
 
 Usage
 --------
