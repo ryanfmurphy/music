@@ -1,0 +1,3 @@
+[submodule "my_db"]
+	path = my_db
+	url = /Users/murftown/dev/gits/bare/my_db.git/
