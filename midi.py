@@ -1855,7 +1855,6 @@ def try_open_chord(pitches):
         return pitches
 
 
-
 'maybe play something if invoked directly instead of imported'
 
 if __name__ == '__main__':
