@@ -6,7 +6,8 @@ f.CHORD_VEL = 70
 f.SOMETIMES_DELAY = False
 f.INSTRUMENTS = (24,49)
 
-f.DURATION = midi.swung_dur(.18,.12).next
+f.DURATION = .2
+#f.DURATION = midi.swung_dur(.18,.12).next
 
 @f.start_chord('C')
 def cdefgfga():

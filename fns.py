@@ -51,8 +51,10 @@ def play_funcs(env):
         maybe_delay()
 
 def maybe_delay():
-    if SOMETIMES_DELAY and coinflip(4):
-        delay_len = options(8,16,24,32) #,48,64)
+    #if SOMETIMES_DELAY and coinflip(4):
+        #delay_len = options(8,16,24,32) #,48,64)
+    if SOMETIMES_DELAY and coinflip(2):
+        delay_len = options(8,16,24,32,48,64,128)
         print '.' * delay_len
         delay = '-' * delay_len
         midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
