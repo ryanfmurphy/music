@@ -1,4 +1,4 @@
 from midi import *
-#from melody import *
-#import rhythm
+from melody import *
+import rhythm
 
