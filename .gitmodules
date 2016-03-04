@@ -1,3 +1,6 @@
 [submodule "my_db"]
 	path = my_db
 	url = /Users/murftown/dev/gits/bare/my_db.git/
+[submodule "py_strict_typing"]
+	path = strict_typing
+	url = https://github.com/murftown/py_strict_typing.git
