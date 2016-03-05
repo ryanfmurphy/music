@@ -4,3 +4,6 @@
 [submodule "py_strict_typing"]
 	path = strict_typing
 	url = https://github.com/murftown/py_strict_typing.git
+[submodule "songs"]
+	path = songs
+	url = /Users/murftown/dev/songs/.git
