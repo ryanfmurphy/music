@@ -38,6 +38,7 @@ from fractions import Fraction
 from util2 import lispy_funcall, is_listy
 import signal, sys
 from pprint import pprint as pp
+import copy
 
 
 def close_midi_handler(signal, frame):
@@ -176,39 +177,52 @@ class NoteDisplayer:
 
     def __init__(self):
         self.notes = set()
-        self.held_notes = None
+        self.prev_notes = set()
 
     #todo accumulate positions before you print a line of notes
     #   (allowing multiple zipped events generators to be properly displayed
-    def accumulate_note_position(self, position):
-        self.notes.add(position)
+    def start_note(self, note_pos):
+        self.notes.add(note_pos)
+
+    def release_note(self, note_pos):
+        self.notes.remove(note_pos)
 
     def show_accumulated_notes(self):
         #todo do I really need the list() conversion?
-        print(
-            show_list_spatially(list(self.notes), self.held_notes)
+        held_notes = self.prev_notes.intersection(self.notes)
+        notes = list(
+            self.notes - held_notes
         )
-        #self.held_notes = self.notes #todo handle held notes
-        self.notes = set()
+        #print('notes',self.notes) 
+        #print('prev',self.prev_notes) 
+        #print('held',held_notes) 
+        print(
+            show_list_spatially(notes, list(held_notes))
+        )
+        self.prev_notes = self.notes
+        self.notes = copy.copy(self.notes)
 
 
 
 SHOW_NOTES = True
+SHOW_NOTE_NAMES = True
 NOTE_DISPLAYER = NoteDisplayer()
 
-def note_on(n, vel=VELOCITY, oct=4, chan=0): #todo add show_notes
-    '''print 'note_on', n, vel, oct'''      # -vv
-    '''print n,'''                          # -v
+def note_on(n, vel=VELOCITY, oct=4, chan=0,
+            show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
     pitch = up(n, oct*12)
     if not is_silent(pitch):
         midi_note_on(pitch, vel, chan=chan)
-    if SHOW_NOTES:
-        NOTE_DISPLAYER.accumulate_note_position(pitch)
+    if show_notes:
+        NOTE_DISPLAYER.start_note(pitch)
 
-def note_off(n, oct=4, chan=0):
+def note_off(n, oct=4, chan=0,
+             show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
     pitch = up(n, oct*12)
     if not is_silent(pitch): # if the pitch was silent, no need to silence
         midi_note_off(pitch, chan=chan)
+    if show_notes:
+        NOTE_DISPLAYER.release_note(pitch)
 
 def rand_inst(chan=0):
     instrument = random.randint(0,127)
