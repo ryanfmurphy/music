@@ -49,8 +49,10 @@ def close_midi_handler(signal, frame):
 def install_close_handler():
     signal.signal(signal.SIGINT, close_midi_handler)
 
-def sleep(dur):
-    NOTE_DISPLAYER.show_accumulated_notes()
+def sleep(dur, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
+    if show_notes:
+        NOTE_DISPLAYER.show_accumulated_notes()
     dur = get_dur(dur)
     time.sleep(dur)
 
@@ -238,37 +240,43 @@ def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
     playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding, chan=chan))
 
 
-def chord_on(ns, vel=VELOCITY, oct=4, chan=0):
+def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
-            note_on(n, vel, oct, chan=chan)
+            note_on(n, vel, oct, chan=chan, show_notes=show_notes)
 
-def chord_off(ns, oct=4, chan=0):
+def chord_off(ns, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
-            note_off(n, oct, chan=chan)
+            note_off(n, oct, chan=chan, show_notes=show_notes)
 
-def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0):
+def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_on(pitches, vel=vel, oct=oct, chan=chan)
+        chord_on(pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
 
-def chordstrn_off(chordstrn, oct=4, chan=0):
+def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_off(pitches, oct=oct, chan=chan)
+        chord_off(pitches, oct=oct, chan=chan, show_notes=show_notes)
 
-def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0):
+def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_on(chordstrn, vel=vel, oct=oct, chan=chan)
+            chordstrn_on(chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
 
-def chordname_off(chordname, oct=4, chan=0):
+def chordname_off(chordname, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_off(chordstrn, oct=oct, chan=chan)
+            chordstrn_off(chordstrn, oct=oct, chan=chan, show_notes=show_notes)
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
@@ -291,13 +299,15 @@ def notec_on(item, vel=VELOCITY, oct=4, chan=0):
     else:
         note_on(item, vel, oct, chan=chan)
 
-def notes_on_g(item, vel=VELOCITY, oct=4, chan=0):
+def notes_on_g(item, vel=VELOCITY, oct=4, chan=0,
+               show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if item in (None,''): yield None
     if isinstance(item,list) or isinstance(item,tuple):
         for note in item:
-            yield ('note_on', note, vel, oct, chan)
+            yield ('note_on', note, vel, oct, chan, show_notes)
     else:
-        yield ('note_on', item, vel, oct, chan)
+        yield ('note_on', item, vel, oct, chan, show_notes)
 
 '''
 And similarly, a `notec_off` function
@@ -861,7 +871,6 @@ def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
 def play_strn(strn, dur=DURATION, leave_sounding=False,
               show_notes=None, prev_pitch=None,
               vel=VELOCITY):
-    global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     if strn is None:
         return None
@@ -968,7 +977,9 @@ look at the last_note or all the last_notes
 as well as the current_note or all the current_notes
 and decide which notes to turn off
 '''
-def notes_off_g(sounding_notes, oct, chan=0, new_notes=None):
+def notes_off_g(sounding_notes, oct, chan=0, new_notes=None,
+                show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
     if isinstance(sounding_notes, collections.Iterable):
         for i,note in enumerate(sounding_notes):
             corresponding_new_note = None
@@ -992,11 +1003,11 @@ def notes_off_g(sounding_notes, oct, chan=0, new_notes=None):
                     stop_this_note = True
 
             if note != '-' and stop_this_note: #todo maybe use do_hold_note() instead? not sure
-                yield ('note_off', note, oct)
+                yield ('note_off', note, oct, show_notes)
     else: # single last note
         #if new_notes != '-':
         if do_hold_note(new_note): #test
-            yield ('note_off', sounding_notes, oct, chan)
+            yield ('note_off', sounding_notes, oct, chan, show_notes)
 
 
 def iterable(x):
@@ -1030,7 +1041,7 @@ iter_type = type(iter([0]))
 
 def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
             sounding_notes = None, leave_sounding = False,
-            show_notes = None, show_note_names = True #todo remove show_*
+            show_notes = None, show_note_names = True
            ):
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
@@ -1053,11 +1064,12 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
         else:
             new_notes = n
 
-        #print "sounding notes:", sounding_notes
-        #print "whereas new notes:", new_notes
+        # note_offs
+            #print "sounding notes:", sounding_notes
+            #print "whereas new notes:", new_notes
         if not first_time:
             these_note_offs = []
-            for this_note_off in notes_off_g(sounding_notes, oct, chan, new_notes):
+            for this_note_off in notes_off_g(sounding_notes, oct, chan, new_notes, show_notes=show_notes):
                 #print '  an off:',this_note_off
                 these_note_offs.append(this_note_off[1])
                 yield this_note_off
@@ -1065,9 +1077,9 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
 
         first_time = False
         
-        # note_on - #todo make a generator that does this one at a time instead of notec_on
+        # note_ons
         these_note_ons = []
-        for this_note_on in notes_on_g(new_notes, vel, oct, chan=chan):
+        for this_note_on in notes_on_g(new_notes, vel, oct, chan=chan, show_notes=show_notes):
             note = this_note_on[1]
             if note != '-':
                 these_note_ons.append(note)
@@ -1091,11 +1103,8 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
         elif new_notes is not '-':
             sounding_notes = new_notes
 
-        #if show_notes:
-            #print(show_list_spatially(new_notes, sounding_notes, offset=30, show_note_names=show_note_names))
-
         # sleep
-        yield ('sleep', dur)
+        yield ('sleep', dur, show_notes)
 
         
     # if we actually played any notes...

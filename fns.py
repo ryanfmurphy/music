@@ -51,10 +51,8 @@ def play_funcs(env):
         maybe_delay()
 
 def maybe_delay():
-    #if SOMETIMES_DELAY and coinflip(4):
-        #delay_len = options(8,16,24,32) #,48,64)
     if SOMETIMES_DELAY and coinflip(2):
-        delay_len = options(8,16,24,32,48,64,128)
+        delay_len = options(8,16,24,32,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
         midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
@@ -174,8 +172,8 @@ def process_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            midi.chordname_off(sounding_chord, chan=1)
-        midi.chordname_on(chord, vel=CHORD_VEL, chan=1)
+            midi.chordname_off(sounding_chord, chan=1, show_notes=False)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=False)
         print_chord(chord)
         sounding_chord = chord
         chord = None
