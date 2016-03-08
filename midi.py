@@ -183,9 +183,12 @@ class NoteDisplayer:
     #   (allowing multiple zipped events generators to be properly displayed
     def start_note(self, note_pos):
         self.notes.add(note_pos)
+        # allow rearticulation by not considering it a "held note"
+        # (remove from prev_notes)
+        self.prev_notes.discard(note_pos)
 
     def release_note(self, note_pos):
-        self.notes.remove(note_pos)
+        self.notes.discard(note_pos)
 
     def show_accumulated_notes(self):
         #todo do I really need the list() conversion?
