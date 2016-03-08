@@ -827,7 +827,7 @@ def close_big_intervals(nums, prev_pitch=None):
     for n in nums:
         n = close_1_big_interval(n, prev_pitch)
         yield n
-        if n not in ['-',' ']: prev_pitch = n
+        if n not in ['-',' ',None]: prev_pitch = n
 
 
 def close_big_intervals_interactive(prev_pitch = None):
@@ -848,17 +848,15 @@ def strn2pitches(strn, prev_pitch=None):
 
 def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
                  show_notes=None, prev_pitch=None,
-                 vel=VELOCITY):
+                 vel=VELOCITY, oct=4):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     return eventsg(
         strn2pitches(strn, prev_pitch),
-        dur=dur, vel=vel,
+        dur=dur, vel=vel, oct=oct,
         leave_sounding=leave_sounding,
         show_notes=show_notes,
     )
-
-estrn = eventsg_strn
 
 def play_strn(strn, dur=DURATION, leave_sounding=False,
               show_notes=None, prev_pitch=None,
@@ -878,6 +876,10 @@ def play_strn(strn, dur=DURATION, leave_sounding=False,
                          vel=vel,
             )
         )
+
+estrn = eventsg_strn
+pstrn = play_strn
+
 
 def strn_note_on(ch):
     pitch = note_numbers[ch]
@@ -907,6 +909,7 @@ bach6strn = [
     "e---m---o---a---b---R---S---E-S-R-b-E---_---------e---s---d---r---B---A---O---M---OAO-BAB-OMO-ESE---r---e---m---h---R-,-S---B---s---e---o---b-,-R---r---e---m---o---h---b---e---o---m-R-h-R-e-R-s---e---m---B-bhb-mem-srs-mem-srs-BHB-----,-b-'-"*2,
 ]
 
+# Q. How does this compare to using zip_events later?
 def eventsg_parts(parts, octaves=None, dur=DURATION,
                   vel=VELOCITY, show_notes=None):
     global SHOW_NOTES
@@ -930,6 +933,7 @@ def eventsg_strns(strns, octaves=None, dur=DURATION,
 
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
     playe(eventsg_strns(strns, octaves=octaves, dur=dur, vel=vel))
+
 
 def play_whatever(thing, show_notes=None):
     global SHOW_NOTES
@@ -1031,7 +1035,7 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
-    '#note: this works pretty well! needs some cleanup'
+    '#note: this eventsg works pretty well! needs some cleanup'
 
     "#todo there's an issue where if one voice runs out of notes before the other\
     it will leave the last note hanging.  Passing 'None' should stop the voice"
@@ -1873,6 +1877,11 @@ def zip_events(*event_streams):
             else: # we have bigger sleep, subtract the small sleep (replace event)
                 current_sleep_time = get_sleep_time(next_event[i])
                 next_event[i] = ('sleep', current_sleep_time - min_sleep_amt)
+
+zipe = zip_events
+
+def playz(*event_streams):
+    return playe(zip_events(*event_streams))
         
 
 def is_sleep_event(event):
