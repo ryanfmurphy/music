@@ -47,12 +47,13 @@ def play_funcs(env):
         else:
             times = options(1,2,4)
         for x in range(times):
-            play_func(func)
+            midi.playe(eventsg_func(func))
+            #play_func(func)
         maybe_delay()
 
 def maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
-        delay_len = options(8,16,24,32,48,64)
+        delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
         midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
@@ -168,6 +169,76 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
         vel = MEL_VEL,
     )
 
+
+
+# event-stream-based version of play_func
+def eventsg_func(fn, do_response=None):
+
+    global chord, DURATION
+
+    fname = get_fname(fn)
+
+    if not is_lambda(fname):
+
+        # do start tempo change
+        start_dur = get_start_dur(fn)
+        if start_dur is not None:
+            DURATION = start_dur
+
+        # do chord change if any
+        start_chord = get_start_chord(fn)
+        if start_chord:
+            chord = start_chord
+            for e in eventsg_chord_change(): yield e
+
+        # play function name
+        print_fname(fname)
+        fname = fname2mus_strn(fname)
+        pause1 = pause_amt()
+        fname_events = midi.eventsg_strn(
+            with_pause_after(fname, pause1),
+            show_notes = False,
+            dur = DURATION,
+            vel = MEL_VEL,
+        )
+        for e in fname_events: yield e
+
+        # maybe run function and play response
+        if do_response is None:
+            do_response = True #coinflip()
+        if do_response:
+            eventsg_fn_response(fn, pause1=pause1) #todo fix prev_pitch, prev_pitch=last_pitch)
+
+def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
+    if is_function(fn):
+        response = fn()
+        if isinstance(response, types.GeneratorType):
+            for section in response:
+                #new_prev_pitch = eventsg_fn_response_1(section, pause1, prev_pitch)
+                #prev_pitch = new_prev_pitch
+                for e in eventsg_fn_response_1(section, pause1, prev_pitch): yield e
+        else:
+            for e in eventsg_fn_response_1(response, pause1): yield e #todo fix: , prev_pitch)
+
+def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
+    for e in eventsg_chord_change(): yield e
+    print_response(response)
+    response = str2mus_strn(response)
+
+    pause2 = pause_amt(at_least = pause1)
+    response = with_pause_after(response, pause2)
+
+    for e in midi.eventsg_strn(
+        response,
+        show_notes = False,
+        dur = DURATION, 
+        prev_pitch = prev_pitch,
+        vel = MEL_VEL,
+    ):
+        yield e
+
+
+
 def process_chord_change():
     global chord, sounding_chord
     if chord is not None:
@@ -177,6 +248,19 @@ def process_chord_change():
         print_chord(chord)
         sounding_chord = chord
         chord = None
+
+def eventsg_chord_change():
+    return [] #todo
+    '''
+    global chord, sounding_chord
+    if chord is not None:
+        if sounding_chord:
+            midi.chordname_off(sounding_chord, chan=1, show_notes=False)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=False)
+        print_chord(chord)
+        sounding_chord = chord
+        chord = None
+    '''
 
 def get_start_chord(fn):
     if hasattr(fn, 'chord'):

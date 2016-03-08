@@ -175,6 +175,7 @@ prog_chg = midi_program_change
 
 
 
+#todo clear the notes on KeyboardInterrupt or something
 class NoteDisplayer:
 
     def __init__(self):
