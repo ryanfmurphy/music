@@ -49,6 +49,7 @@ def install_close_handler():
     signal.signal(signal.SIGINT, close_midi_handler)
 
 def sleep(dur):
+    NOTE_DISPLAYER.show_accumulated_notes()
     dur = get_dur(dur)
     time.sleep(dur)
 
@@ -169,12 +170,40 @@ prog_chg = midi_program_change
 
 'higher level functionality - octave offset & some rest / note holding logic'
 
-def note_on(n, vel=VELOCITY, oct=4, chan=0):
+
+
+class NoteDisplayer:
+
+    def __init__(self):
+        self.notes = set()
+        self.held_notes = None
+
+    #todo accumulate positions before you print a line of notes
+    #   (allowing multiple zipped events generators to be properly displayed
+    def accumulate_note_position(self, position):
+        self.notes.add(position)
+
+    def show_accumulated_notes(self):
+        #todo do I really need the list() conversion?
+        print(
+            show_list_spatially(list(self.notes), self.held_notes)
+        )
+        #self.held_notes = self.notes #todo handle held notes
+        self.notes = set()
+
+
+
+SHOW_NOTES = True
+NOTE_DISPLAYER = NoteDisplayer()
+
+def note_on(n, vel=VELOCITY, oct=4, chan=0): #todo add show_notes
     '''print 'note_on', n, vel, oct'''      # -vv
     '''print n,'''                          # -v
     pitch = up(n, oct*12)
     if not is_silent(pitch):
         midi_note_on(pitch, vel, chan=chan)
+    if SHOW_NOTES:
+        NOTE_DISPLAYER.accumulate_note_position(pitch)
 
 def note_off(n, oct=4, chan=0):
     pitch = up(n, oct*12)
@@ -800,8 +829,6 @@ def strn2numbers(strn):
 def strn2pitches(strn, prev_pitch=None):
     return close_big_intervals(strn2numbers(strn), prev_pitch)
 
-SHOW_NOTES = True
-
 def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
                  show_notes=None, prev_pitch=None,
                  vel=VELOCITY):
@@ -955,6 +982,8 @@ def iterable(x):
     return isinstance(x, collections.Iterable)
 
 
+
+
 def show_list_spatially(positions, held_positions=None, offset=0, show_note_names=False):
     dim, undim = '\033[2m', '\033[0m'
     max_width = 80
@@ -980,7 +1009,8 @@ iter_type = type(iter([0]))
 
 def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
             sounding_notes = None, leave_sounding = False,
-            show_notes = None, show_note_names = True):
+            show_notes = None, show_note_names = True #todo remove show_*
+           ):
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
@@ -1040,8 +1070,8 @@ def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
         elif new_notes is not '-':
             sounding_notes = new_notes
 
-        if show_notes:
-            print(show_list_spatially(new_notes, sounding_notes, offset=30, show_note_names=show_note_names))
+        #if show_notes:
+            #print(show_list_spatially(new_notes, sounding_notes, offset=30, show_note_names=show_note_names))
 
         # sleep
         yield ('sleep', dur)
