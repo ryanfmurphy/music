@@ -216,7 +216,9 @@ def eventsg_func(fn, do_response=None):
         if do_response is None:
             do_response = True #coinflip()
         if do_response:
-            eventsg_fn_response(fn, pause1=pause1) #todo fix prev_pitch, prev_pitch=last_pitch)
+            #todo fix prev_pitch=last_pitch so octwrap is right
+            for e in eventsg_fn_response(fn, pause1=pause1):
+                yield e
 
 def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
     if is_function(fn):
@@ -259,17 +261,20 @@ def process_chord_change():
         chord = None
 
 def eventsg_chord_change():
-    return [] #todo
-    '''
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            midi.chordname_off(sounding_chord, chan=1, show_notes=SHOW_NOTES)
-        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES)
+            for e in midi.eventsg_chordname_off(
+                sounding_chord, chan=1, show_notes=SHOW_NOTES
+            ):
+                yield e
+        for e in midi.eventsg_chordname_on(
+            chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES
+        ):
+            yield e
         print_chord(chord)
         sounding_chord = chord
         chord = None
-    '''
 
 def get_start_chord(fn):
     if hasattr(fn, 'chord'):
