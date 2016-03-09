@@ -1,35 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*- 
 
-'''
-MIDI / Music Theory / Music Sequencing Fun in Python
-====================================================
-*by Ryan Murphy*
-
-This python program sends MIDI notes to a MIDI interface to create music.
-
-Environment / Dependencies
---------------------------
-
-You need:
-
-* python (I'm using python 2.7)
-* rtmidi for sending midi messages - https://pypi.python.org/pypi/python-rtmidi
-* a MIDI device capable of receiving MIDI messages and coverting them to sound
-
-For example, my Mac couldn't play the MIDI file directly (at least I couldn't
-figure out how), so I had to install a Synth / MIDI server called fluidsynth,
-and start it up via e.g.:
-
-    fluidsynth -d "/path/to/GeneralUser GS FluidSynth v1.44.sf2"
-
-    in my case it's 
-        fluidsynth -d "~/dev/GeneralUser GS 1.44 FluidSynth/GeneralUser GS FluidSynth v1.44.sf2"
-
-
-Let's make some noise!
-'''
-
 import rtmidi
 import itertools, collections
 import time
@@ -229,6 +200,8 @@ def note_off(n, oct=4, chan=0,
         midi_note_off(pitch, chan=chan)
     if show_notes:
         NOTE_DISPLAYER.release_note(pitch)
+
+
 
 def rand_inst(chan=0):
     instrument = random.randint(0,127)
@@ -1177,6 +1150,7 @@ def playe(events, silence_on_abort = False):
         except KeyboardInterrupt:
             panic()
     else:
+        #todo what if the last "pitch" is really a chord?
         last_pitch = None
         for e in events:
             # get pitch from last note_on event
@@ -1684,7 +1658,7 @@ def valentine_e():
     return eventsg_cp(my_funny_valentine, pattern=[0,1,2,3]*2, dur=swung_dur(.4,.2).next)
 
 def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
-    playe(
+    return playe(
         eventsg_cp(chord_progression, times=times, pattern=pattern, oct_pattern=oct_pattern, dur=dur)
     )
 
