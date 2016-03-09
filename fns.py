@@ -503,10 +503,12 @@ def choose_instruments(args): #todo clean up / simplify
     #return
 
     sug0,sug1 = midi.cool_inst_combo()
-    do_sug = coinflip()
+    do_sug = True # coinflip()
+
+    user_specified_instruments = len(args) > 0 and args[0] != 'rnd'
 
     # set inst 0
-    if len(args) > 0 and args[0] != 'rnd':
+    if user_specified_instruments:
         inst0 = int(args[0])
     elif do_sug:
         inst0 = sug0
@@ -522,7 +524,7 @@ def choose_instruments(args): #todo clean up / simplify
         inst1 = midi.rand_inst(chan=1)
 
     # description
-    if len(args) > 0:   
+    if user_specified_instruments:
         print "setting custom instruments", (inst0, inst1)
     elif do_sug:
         print "known cool instrument combo", (inst0, inst1)
