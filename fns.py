@@ -10,6 +10,7 @@ DURATION = .2 #music.swung_dur(.4,.2).next
 SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
 INSTRUMENTS = None
+SHOW_NOTES = True
 
 chord = None
 sounding_chord = None
@@ -47,15 +48,25 @@ def play_funcs(env):
         else:
             times = options(1,2,4)
         for x in range(times):
-            play_func(func)
-        maybe_delay()
+            midi.playe(eventsg_func(func))
+        midi.playe(eventsg_maybe_delay())
 
 def maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
-        delay_len = options(8,16,24,32,48,64)
+        delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
+        midi.play_strn(delay, show_notes=SHOW_NOTES, vel=MEL_VEL)
+
+def eventsg_maybe_delay():
+    if SOMETIMES_DELAY and coinflip(2):
+        delay_len = options(8,16,24,32) #,48,64)
+        print '.' * delay_len
+        delay = '-' * delay_len
+        for e in midi.eventsg_strn(
+            delay, show_notes=SHOW_NOTES, vel=MEL_VEL
+        ):
+            yield e
 
 @typerule(at_least=int, _ret_type=int)
 def pause_amt(at_least=1):
@@ -131,7 +142,7 @@ def play_func(fn, do_response=None):
         pause1 = pause_amt()
         last_pitch = midi.play_strn(
             with_pause_after(fname, pause1),
-            show_notes = False,
+            show_notes = SHOW_NOTES,
             dur = DURATION,
             vel = MEL_VEL,
         )
@@ -162,18 +173,127 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
 
     return midi.play_strn(
         response,
-        show_notes = False,
+        show_notes = SHOW_NOTES,
         dur = DURATION, 
         prev_pitch = prev_pitch,
         vel = MEL_VEL,
     )
 
+
+
+# event-stream-based version of play_func
+def eventsg_func(fn, do_response=None):
+
+    global chord, DURATION
+
+    fname = get_fname(fn)
+
+    if not is_lambda(fname):
+
+        # do start tempo change
+        start_dur = get_start_dur(fn)
+        if start_dur is not None:
+            DURATION = start_dur
+
+        # do chord change if any
+        start_chord = get_start_chord(fn)
+        if start_chord:
+            chord = start_chord
+            for e in eventsg_chord_change(): yield e
+
+        # play function name
+        print_fname(fname)
+        fname = fname2mus_strn(fname)
+        pause1 = pause_amt()
+        fname_events = midi.eventsg_strn(
+            with_pause_after(fname, pause1),
+            show_notes = SHOW_NOTES,
+            dur = DURATION,
+            vel = MEL_VEL,
+        )
+
+        #todo find a simpler way for last_pitch -
+            # maybe allow the eventsg to write into
+            # some shared value, like a list or dict?
+            # (maybe not tho, this seems maybe ok)
+        last_pitch = None
+        for e in fname_events:
+            last_pitch = midi.maybe_set_pitch(last_pitch, e)
+            yield e
+
+        # maybe run function and play response
+        if do_response is None:
+            do_response = True #coinflip()
+        if do_response:
+            #todo figure out last_pitch / prev_pitch stuff
+            for e in eventsg_fn_response(fn, pause1=pause1, prev_pitch=last_pitch):
+                yield e
+
+def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
+    if is_function(fn):
+        response = fn()
+        if isinstance(response, types.GeneratorType):
+            for section in response:
+                #new_prev_pitch = eventsg_fn_response_1(section, pause1, prev_pitch)
+                #prev_pitch = new_prev_pitch
+                new_prev_pitch = None
+                for e in eventsg_fn_response_1(
+                    section, pause1, prev_pitch=prev_pitch
+                ):
+                    new_prev_pitch = midi.maybe_set_pitch(new_prev_pitch,e)
+                    yield e
+                prev_pitch = new_prev_pitch
+        else:
+            for e in eventsg_fn_response_1(
+                response, pause1,
+                prev_pitch = prev_pitch
+            ):
+                yield e
+
+def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
+    for e in eventsg_chord_change(): yield e
+    print_response(response)
+    response = str2mus_strn(response)
+
+    pause2 = pause_amt(at_least = pause1)
+    response = with_pause_after(response, pause2)
+
+    if is_string(response):
+        for e in midi.eventsg_strn(
+            response,
+            show_notes = SHOW_NOTES,
+            dur = DURATION, 
+            prev_pitch = prev_pitch,
+            vel = MEL_VEL,
+        ):
+            yield e
+    else:
+        pass # don't yield anything
+
+
+
 def process_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            midi.chordname_off(sounding_chord, chan=1, show_notes=False)
-        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=False)
+            midi.chordname_off(sounding_chord, chan=1, show_notes=SHOW_NOTES)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES)
+        print_chord(chord)
+        sounding_chord = chord
+        chord = None
+
+def eventsg_chord_change():
+    global chord, sounding_chord
+    if chord is not None:
+        if sounding_chord:
+            for e in midi.eventsg_chordname_off(
+                sounding_chord, chan=1, show_notes=SHOW_NOTES
+            ):
+                yield e
+        for e in midi.eventsg_chordname_on(
+            chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES
+        ):
+            yield e
         print_chord(chord)
         sounding_chord = chord
         chord = None
@@ -287,7 +407,7 @@ class MusicConsole(code.InteractiveConsole):
                 tree.body.append(print_node)
                 # play_whatever
                     #todo doesn't work for generators yet
-                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=False)
+                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=SHOW_NOTES)
                 tree.body.append(play_whatever_node)
             #print ast.dump(tree)
             code_obj = compile(tree, '<input>', 'exec')
@@ -430,7 +550,7 @@ def mult_duration(durmult):
     DURATION *= durmult
 
 def play_id(strn):
-    midi.play_strn(fname2mus_strn(strn), show_notes=False, vel=MEL_VEL)
+    midi.play_strn(fname2mus_strn(strn), show_notes=SHOW_NOTES, vel=MEL_VEL)
 
 # the start_chord decorator
 def start_chord(the_chord):

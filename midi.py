@@ -1,35 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*- 
 
-'''
-MIDI / Music Theory / Music Sequencing Fun in Python
-====================================================
-*by Ryan Murphy*
-
-This python program sends MIDI notes to a MIDI interface to create music.
-
-Environment / Dependencies
---------------------------
-
-You need:
-
-* python (I'm using python 2.7)
-* rtmidi for sending midi messages - https://pypi.python.org/pypi/python-rtmidi
-* a MIDI device capable of receiving MIDI messages and coverting them to sound
-
-For example, my Mac couldn't play the MIDI file directly (at least I couldn't
-figure out how), so I had to install a Synth / MIDI server called fluidsynth,
-and start it up via e.g.:
-
-    fluidsynth -d "/path/to/GeneralUser GS FluidSynth v1.44.sf2"
-
-    in my case it's 
-        fluidsynth -d "~/dev/GeneralUser GS 1.44 FluidSynth/GeneralUser GS FluidSynth v1.44.sf2"
-
-
-Let's make some noise!
-'''
-
 import rtmidi
 import itertools, collections
 import time
@@ -175,6 +146,7 @@ prog_chg = midi_program_change
 
 
 
+#todo clear the notes on KeyboardInterrupt or something
 class NoteDisplayer:
 
     def __init__(self):
@@ -229,6 +201,8 @@ def note_off(n, oct=4, chan=0,
     if show_notes:
         NOTE_DISPLAYER.release_note(pitch)
 
+
+
 def rand_inst(chan=0):
     instrument = random.randint(0,127)
     midi_program_change(instrument, chan=chan)
@@ -237,46 +211,101 @@ def rand_inst(chan=0):
 
 def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
     if dur is None: dur = DURATION
-    playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding, chan=chan))
+    playe(
+        eventsg(
+            ns, vel=vel, oct=oct, dur=dur,
+            leave_sounding=leave_sounding, chan=chan
+        )
+    )
 
 
 def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
-    if show_notes is None: show_notes = SHOW_NOTES
-    if ns:
-        for n in ns:
-            note_on(n, vel, oct, chan=chan, show_notes=show_notes)
+    return playe(
+        eventsg_chord_on(
+            ns, vel=vel, oct=oct,
+            chan=chan, show_notes=show_notes
+        )
+    )
 
 def chord_off(ns, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chord_off(ns, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+
+def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordstrn_on(
+            chordstrn, vel=vel, oct=oct,
+            chan=chan, show_notes=show_notes
+        )
+    )
+
+def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+    return playe(
+        chordstrn_off(chordstrn, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordname_on(chordname, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+def chordname_off(chordname, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordname_off(chordname, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+
+def eventsg_chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
-            note_off(n, oct, chan=chan, show_notes=show_notes)
+            yield ('note_on', n, vel, oct, chan, show_notes)
 
-def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def eventsg_chord_off(ns, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
+    if ns:
+        for n in ns:
+            yield ('note_off', n, oct, chan, show_notes)
+
+def eventsg_chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_on(pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+        for e in eventsg_chord_on(
+            pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes
+        ):
+            yield e
 
-def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+def eventsg_chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_off(pitches, oct=oct, chan=chan, show_notes=show_notes)
+        for e in eventsg_chord_off(
+            pitches, oct=oct, chan=chan, show_notes=show_notes
+        ):
+            yield e
 
-def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def eventsg_chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_on(chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+            for e in eventsg_chordstrn_on(
+                chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes
+            ):
+                yield e
 
-def chordname_off(chordname, oct=4, chan=0, show_notes=None):
+def eventsg_chordname_off(chordname, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_off(chordstrn, oct=oct, chan=chan, show_notes=show_notes)
+            for e in eventsg_chordstrn_off(
+                chordstrn, oct=oct, chan=chan, show_notes=show_notes
+            ):
+                yield e
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
@@ -1003,7 +1032,7 @@ def notes_off_g(sounding_notes, oct, chan=0, new_notes=None,
                     stop_this_note = True
 
             if note != '-' and stop_this_note: #todo maybe use do_hold_note() instead? not sure
-                yield ('note_off', note, oct, show_notes)
+                yield ('note_off', note, oct, chan, show_notes)
     else: # single last note
         #if new_notes != '-':
         if do_hold_note(new_note): #test
@@ -1121,14 +1150,22 @@ def playe(events, silence_on_abort = False):
         except KeyboardInterrupt:
             panic()
     else:
+        #todo what if the last "pitch" is really a chord?
         last_pitch = None
         for e in events:
             # get pitch from last note_on event
-            possible_pitch = get_lispy_funcall_pitch(e)
-            if possible_pitch is not None: last_pitch = possible_pitch
+            last_pitch = maybe_set_pitch(last_pitch, e)
             # exec actual funcall
             lispy_funcall(e, env=globals())
         return last_pitch
+
+def maybe_set_pitch(current_pitch, new_event):
+    possible_pitch = get_lispy_funcall_pitch(new_event)
+    if possible_pitch is not None:
+        return possible_pitch
+    else:
+        return current_pitch
+    
 
 def get_lispy_funcall_pitch(e):
     if e[0] == 'note_on':
@@ -1628,7 +1665,7 @@ def valentine_e():
     return eventsg_cp(my_funny_valentine, pattern=[0,1,2,3]*2, dur=swung_dur(.4,.2).next)
 
 def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
-    playe(
+    return playe(
         eventsg_cp(chord_progression, times=times, pattern=pattern, oct_pattern=oct_pattern, dur=dur)
     )
 
