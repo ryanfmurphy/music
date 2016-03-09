@@ -247,42 +247,92 @@ def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
 
 
 def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
-    if show_notes is None: show_notes = SHOW_NOTES
-    if ns:
-        for n in ns:
-            note_on(n, vel, oct, chan=chan, show_notes=show_notes)
+    return playe(
+        eventsg_chord_on(
+            ns, vel=vel, oct=oct,
+            chan=chan, show_notes=show_notes
+        )
+    )
 
 def chord_off(ns, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chord_off(ns, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+
+def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordstrn_on(
+            chordstrn, vel=vel, oct=oct,
+            chan=chan, show_notes=show_notes
+        )
+    )
+
+def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+    return playe(
+        chordstrn_off(chordstrn, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordname_on(chordname, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+def chordname_off(chordname, oct=4, chan=0, show_notes=None):
+    return playe(
+        eventsg_chordname_off(chordname, oct=oct, chan=chan, show_notes=show_notes)
+    )
+
+
+def eventsg_chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
-            note_off(n, oct, chan=chan, show_notes=show_notes)
+            yield ('note_on', n, vel, oct, chan, show_notes)
 
-def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def eventsg_chord_off(ns, oct=4, chan=0, show_notes=None):
+    if show_notes is None: show_notes = SHOW_NOTES
+    if ns:
+        for n in ns:
+            yield ('note_off', n, oct, chan, show_notes)
+
+def eventsg_chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_on(pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+        for e in eventsg_chord_on(
+            pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes
+        ):
+            yield e
 
-def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+def eventsg_chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        chord_off(pitches, oct=oct, chan=chan, show_notes=show_notes)
+        for e in eventsg_chord_off(
+            pitches, oct=oct, chan=chan, show_notes=show_notes
+        ):
+            yield e
 
-def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def eventsg_chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_on(chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+            for e in eventsg_chordstrn_on(
+                chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes
+            ):
+                yield e
 
-def chordname_off(chordname, oct=4, chan=0, show_notes=None):
+def eventsg_chordname_off(chordname, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            chordstrn_off(chordstrn, oct=oct, chan=chan, show_notes=show_notes)
+            for e in eventsg_chordstrn_off(
+                chordstrn, oct=oct, chan=chan, show_notes=show_notes
+            ):
+                yield e
 
 
 def chord(ns, dur=.2, vel=VELOCITY, oct=4):
