@@ -10,6 +10,7 @@ DURATION = .2 #music.swung_dur(.4,.2).next
 SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
 INSTRUMENTS = None
+SHOW_NOTES = True
 
 chord = None
 sounding_chord = None
@@ -49,14 +50,22 @@ def play_funcs(env):
         for x in range(times):
             midi.playe(eventsg_func(func))
             #play_func(func)
-        maybe_delay()
+        midi.playe(eventsg_maybe_delay())
 
 def maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
         delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        midi.play_strn(delay, show_notes=False, vel=MEL_VEL)
+        midi.play_strn(delay, show_notes=SHOW_NOTES, vel=MEL_VEL)
+
+def eventsg_maybe_delay():
+    if SOMETIMES_DELAY and coinflip(2):
+        delay_len = options(8,16,24,32) #,48,64)
+        print '.' * delay_len
+        delay = '-' * delay_len
+        for e in midi.eventsg_strn(delay, show_notes=SHOW_NOTES, vel=MEL_VEL):
+            yield e
 
 @typerule(at_least=int, _ret_type=int)
 def pause_amt(at_least=1):
@@ -132,7 +141,7 @@ def play_func(fn, do_response=None):
         pause1 = pause_amt()
         last_pitch = midi.play_strn(
             with_pause_after(fname, pause1),
-            show_notes = False,
+            show_notes = SHOW_NOTES,
             dur = DURATION,
             vel = MEL_VEL,
         )
@@ -163,7 +172,7 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
 
     return midi.play_strn(
         response,
-        show_notes = False,
+        show_notes = SHOW_NOTES,
         dur = DURATION, 
         prev_pitch = prev_pitch,
         vel = MEL_VEL,
@@ -197,7 +206,7 @@ def eventsg_func(fn, do_response=None):
         pause1 = pause_amt()
         fname_events = midi.eventsg_strn(
             with_pause_after(fname, pause1),
-            show_notes = False,
+            show_notes = SHOW_NOTES,
             dur = DURATION,
             vel = MEL_VEL,
         )
@@ -230,7 +239,7 @@ def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
 
     for e in midi.eventsg_strn(
         response,
-        show_notes = False,
+        show_notes = SHOW_NOTES,
         dur = DURATION, 
         prev_pitch = prev_pitch,
         vel = MEL_VEL,
@@ -243,8 +252,8 @@ def process_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            midi.chordname_off(sounding_chord, chan=1, show_notes=False)
-        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=False)
+            midi.chordname_off(sounding_chord, chan=1, show_notes=SHOW_NOTES)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES)
         print_chord(chord)
         sounding_chord = chord
         chord = None
@@ -255,8 +264,8 @@ def eventsg_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            midi.chordname_off(sounding_chord, chan=1, show_notes=False)
-        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=False)
+            midi.chordname_off(sounding_chord, chan=1, show_notes=SHOW_NOTES)
+        midi.chordname_on(chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES)
         print_chord(chord)
         sounding_chord = chord
         chord = None
@@ -371,7 +380,7 @@ class MusicConsole(code.InteractiveConsole):
                 tree.body.append(print_node)
                 # play_whatever
                     #todo doesn't work for generators yet
-                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=False)
+                play_whatever_node = ast_call_node('midi.play_whatever', '_', show_notes=SHOW_NOTES)
                 tree.body.append(play_whatever_node)
             #print ast.dump(tree)
             code_obj = compile(tree, '<input>', 'exec')
@@ -512,7 +521,7 @@ def mult_duration(durmult):
     DURATION *= durmult
 
 def play_id(strn):
-    midi.play_strn(fname2mus_strn(strn), show_notes=False, vel=MEL_VEL)
+    midi.play_strn(fname2mus_strn(strn), show_notes=SHOW_NOTES, vel=MEL_VEL)
 
 # the start_chord decorator
 def start_chord(the_chord):

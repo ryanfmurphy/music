@@ -238,7 +238,12 @@ def rand_inst(chan=0):
 
 def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
     if dur is None: dur = DURATION
-    playe(eventsg(ns, vel=vel, oct=oct, dur=dur, leave_sounding=leave_sounding, chan=chan))
+    playe(
+        eventsg(
+            ns, vel=vel, oct=oct, dur=dur,
+            leave_sounding=leave_sounding, chan=chan
+        )
+    )
 
 
 def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
@@ -1004,7 +1009,7 @@ def notes_off_g(sounding_notes, oct, chan=0, new_notes=None,
                     stop_this_note = True
 
             if note != '-' and stop_this_note: #todo maybe use do_hold_note() instead? not sure
-                yield ('note_off', note, oct, show_notes)
+                yield ('note_off', note, oct, chan, show_notes)
     else: # single last note
         #if new_notes != '-':
         if do_hold_note(new_note): #test
