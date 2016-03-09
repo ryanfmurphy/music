@@ -211,14 +211,22 @@ def eventsg_func(fn, do_response=None):
             dur = DURATION,
             vel = MEL_VEL,
         )
-        for e in fname_events: yield e
+
+        #todo find a simpler way for last_pitch -
+            # maybe allow the eventsg to write into
+            # some shared value, like a list or dict?
+            # (maybe not tho, this seems maybe ok)
+        last_pitch = None
+        for e in fname_events:
+            last_pitch = midi.maybe_set_pitch(last_pitch, e)
+            yield e
 
         # maybe run function and play response
         if do_response is None:
             do_response = True #coinflip()
         if do_response:
             #todo figure out last_pitch / prev_pitch stuff
-            for e in eventsg_fn_response(fn, pause1=pause1):
+            for e in eventsg_fn_response(fn, pause1=pause1, prev_pitch=last_pitch):
                 yield e
 
 def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
@@ -228,9 +236,19 @@ def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
             for section in response:
                 #new_prev_pitch = eventsg_fn_response_1(section, pause1, prev_pitch)
                 #prev_pitch = new_prev_pitch
-                for e in eventsg_fn_response_1(section, pause1, prev_pitch): yield e
+                new_prev_pitch = None
+                for e in eventsg_fn_response_1(
+                    section, pause1, prev_pitch=prev_pitch
+                ):
+                    new_prev_pitch = midi.maybe_set_pitch(new_prev_pitch,e)
+                    yield e
+                prev_pitch = new_prev_pitch
         else:
-            for e in eventsg_fn_response_1(response, pause1): yield e #todo fix: , prev_pitch)
+            for e in eventsg_fn_response_1(
+                response, pause1,
+                prev_pitch = prev_pitch
+            ):
+                yield e
 
 def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
     for e in eventsg_chord_change(): yield e

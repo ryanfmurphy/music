@@ -1154,11 +1154,18 @@ def playe(events, silence_on_abort = False):
         last_pitch = None
         for e in events:
             # get pitch from last note_on event
-            possible_pitch = get_lispy_funcall_pitch(e)
-            if possible_pitch is not None: last_pitch = possible_pitch
+            last_pitch = maybe_set_pitch(last_pitch, e)
             # exec actual funcall
             lispy_funcall(e, env=globals())
         return last_pitch
+
+def maybe_set_pitch(current_pitch, new_event):
+    possible_pitch = get_lispy_funcall_pitch(new_event)
+    if possible_pitch is not None:
+        return possible_pitch
+    else:
+        return current_pitch
+    
 
 def get_lispy_funcall_pitch(e):
     if e[0] == 'note_on':
