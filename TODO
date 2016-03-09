@@ -1,13 +1,36 @@
 TODO
+====
+
+
+last_pitch passing for eventsg() / playe()
+------------------------------------------
+fix/figure_out how prev_pitch/last_pitch passing
+should work with eventsg-style generator loops.
+when you eventsg() 2 separate events loops in series,
+you have an interesting conundrum -
+    the 2nd eventsg(), which accepts prev_pitch,
+    is already created prior to you really knowing
+    the last_pitch of the first eventsg(), which
+    you get as the return val of playe()
+
+
+doublecheck - leading hyphen means no pause?
+
+
+musictxt - multiple parts playing at a time
+
+
+add drums playing along with stuff
+
+
+global transpose (within fns.py interface)
+
+
+some examples in the README.md of how to use this thing
+
+
+DONE
 ----
 
-#todo - doublecheck - leading hyphen means no pause?
-
-#todo - musictxt - multiple parts playing at a time
-
-#todo - add drums playing along with stuff
-
-#todo - #portability - include strict_typing.py in project or stop using it
-
-#todo - global transpose
+portability - include strict_typing.py in project or stop using it
 

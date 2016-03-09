@@ -49,7 +49,6 @@ def play_funcs(env):
             times = options(1,2,4)
         for x in range(times):
             midi.playe(eventsg_func(func))
-            #play_func(func)
         midi.playe(eventsg_maybe_delay())
 
 def maybe_delay():
@@ -64,7 +63,9 @@ def eventsg_maybe_delay():
         delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        for e in midi.eventsg_strn(delay, show_notes=SHOW_NOTES, vel=MEL_VEL):
+        for e in midi.eventsg_strn(
+            delay, show_notes=SHOW_NOTES, vel=MEL_VEL
+        ):
             yield e
 
 @typerule(at_least=int, _ret_type=int)
@@ -216,7 +217,7 @@ def eventsg_func(fn, do_response=None):
         if do_response is None:
             do_response = True #coinflip()
         if do_response:
-            #todo fix prev_pitch=last_pitch so octwrap is right
+            #todo figure out last_pitch / prev_pitch stuff
             for e in eventsg_fn_response(fn, pause1=pause1):
                 yield e
 
