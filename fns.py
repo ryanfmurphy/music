@@ -258,14 +258,17 @@ def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
     pause2 = pause_amt(at_least = pause1)
     response = with_pause_after(response, pause2)
 
-    for e in midi.eventsg_strn(
-        response,
-        show_notes = SHOW_NOTES,
-        dur = DURATION, 
-        prev_pitch = prev_pitch,
-        vel = MEL_VEL,
-    ):
-        yield e
+    if is_string(response):
+        for e in midi.eventsg_strn(
+            response,
+            show_notes = SHOW_NOTES,
+            dur = DURATION, 
+            prev_pitch = prev_pitch,
+            vel = MEL_VEL,
+        ):
+            yield e
+    else:
+        pass # don't yield anything
 
 
 
