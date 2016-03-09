@@ -14,6 +14,14 @@ you have an interesting conundrum -
     you get as the return val of playe()
 
 
+NoteDisplayer - distinguish between different channels
+------------------------------------------------------
+don't stop a note just because
+    the same note happened on a different channel
+maybe draw them in different colors?
+or allow different offsets?
+
+
 doublecheck - leading hyphen means no pause?
 
 
