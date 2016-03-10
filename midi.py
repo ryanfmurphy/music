@@ -175,7 +175,8 @@ class NoteDisplayer:
         held_note_positions = {n[0] for n in held_notes}
         print(
             show_notes_spatially(
-                notes, list(held_note_positions)
+                notes, list(held_note_positions),
+                0, SHOW_NOTE_NAMES,
             )
         )
         self.prev_notes = self.notes
@@ -191,16 +192,14 @@ NOTE_DISPLAYER = NoteDisplayer()
 'higher level functionality - octave offset & some rest / note holding logic'
 
 
-def note_on(n, vel=VELOCITY, oct=4, chan=0,
-            show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
+def note_on(n, vel=VELOCITY, oct=4, chan=0, show_notes=SHOW_NOTES):
     pitch = up(n, oct*12)
     if not is_silent(pitch):
         midi_note_on(pitch, vel, chan=chan)
     if show_notes:
         NOTE_DISPLAYER.start_note(pitch, chan)
 
-def note_off(n, oct=4, chan=0,
-             show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
+def note_off(n, oct=4, chan=0, show_notes=SHOW_NOTES):
     pitch = up(n, oct*12)
     if not is_silent(pitch): # if the pitch was silent, no need to silence
         midi_note_off(pitch, chan=chan)
@@ -334,8 +333,7 @@ def notec_on(item, vel=VELOCITY, oct=4, chan=0):
     else:
         note_on(item, vel, oct, chan=chan)
 
-def notes_on_g(item, vel=VELOCITY, oct=4, chan=0,
-               show_notes=None):
+def notes_on_g(item, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if item in (None,''): yield None
     if isinstance(item,list) or isinstance(item,tuple):
@@ -892,8 +890,9 @@ def strn2pitches(strn, prev_pitch=None):
     return close_big_intervals(strn2numbers(strn), prev_pitch)
 
 def ev_strn(strn, dur=DURATION, leave_sounding=False,
-                 show_notes=None, prev_pitch=None,
-                 vel=VELOCITY, oct=4):
+            show_notes=None, prev_pitch=None,
+            vel=VELOCITY, oct=4
+           ):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     return ev_pitches(
@@ -1093,9 +1092,7 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
 iter_type = type(iter([0]))
 
 def ev_pitches(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
-            sounding_notes = None, leave_sounding = False,
-            show_notes = None, show_note_names = True
-           ):
+            sounding_notes = None, leave_sounding = False, show_notes = None):
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
@@ -1122,7 +1119,11 @@ def ev_pitches(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
             #print "whereas new notes:", new_notes
         if not first_time:
             these_note_offs = []
-            for this_note_off in notes_off_g(sounding_notes, oct, chan, new_notes, show_notes=show_notes):
+            note_off_events = notes_off_g(
+                sounding_notes, oct, chan, new_notes,
+                show_notes=show_notes,
+            )
+            for this_note_off in note_off_events:
                 #print '  an off:',this_note_off
                 these_note_offs.append(this_note_off[1])
                 yield this_note_off
@@ -1132,7 +1133,11 @@ def ev_pitches(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
         
         # note_ons
         these_note_ons = []
-        for this_note_on in notes_on_g(new_notes, vel, oct, chan=chan, show_notes=show_notes):
+        note_on_events = notes_on_g(
+            new_notes, vel, oct, chan=chan,
+            show_notes=show_notes,
+        )
+        for this_note_on in note_on_events:
             note = this_note_on[1]
             if note != '-':
                 these_note_ons.append(note)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import midi
 from isness import *
 import types, random, code, ast, _ast, readline, sys, os, atexit
@@ -11,9 +12,15 @@ SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
 INSTRUMENTS = None
 SHOW_NOTES = True
+midi.SHOW_NOTE_NAMES = True
+VERBOSE = False
 
 chord = None
 sounding_chord = None
+
+def log(*args):
+    if VERBOSE:
+        print(*args)
 
 # change the chord to the_chord only if it's not already
 @typerule(the_chord=str)
@@ -57,10 +64,11 @@ def maybe_delay():
 def ev_maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
         delay_len = options(8,16,24,32) #,48,64)
-        print '.' * delay_len
+        log('.' * delay_len)
         delay = '-' * delay_len
         for e in midi.ev_strn(
-            delay, show_notes=SHOW_NOTES, vel=MEL_VEL
+            delay, vel=MEL_VEL,
+            show_notes=SHOW_NOTES,
         ):
             yield e
 
@@ -97,11 +105,11 @@ def fname2mus_strn(fname):
 
 @typerule(fname=str)
 def print_fname(fname):
-    print fname + '()'
+    log(fname + '()')
 
 def print_response(response):
     if is_string(response):
-        print ' '*RESPONSE_OFFSET + str(response)
+        log(' '*RESPONSE_OFFSET + str(response))
     else:
         pass
 
@@ -144,9 +152,8 @@ def ev_func_name(fname, pause):
     fname = fname2mus_strn(fname)
     fname_events = midi.ev_strn(
         with_pause_after(fname, pause),
+        dur = DURATION, vel = MEL_VEL,
         show_notes = SHOW_NOTES,
-        dur = DURATION,
-        vel = MEL_VEL,
     )
     for e in fname_events: yield e
 
@@ -211,10 +218,10 @@ def ev_fn_response_1(response, pause1=None, prev_pitch=None):
     if is_string(response):
         for e in midi.ev_strn(
             response,
-            show_notes = SHOW_NOTES,
             dur = DURATION, 
             prev_pitch = prev_pitch,
             vel = MEL_VEL,
+            show_notes = SHOW_NOTES,
         ):
             yield e
     else:
@@ -247,7 +254,7 @@ def chord_offset():
     return RESPONSE_OFFSET / 2
 
 def print_chord(chord):
-    print ' '*chord_offset() + "[" + chord + "]"
+    log(' '*chord_offset() + "[" + chord + "]")
 
 def musicall(fn): #todo args
     play_func(fn, do_response=True)
@@ -276,7 +283,7 @@ def goof_around(env):
         while True:
             play_funcs(env)
     except KeyboardInterrupt:
-        print "Bye!"
+        print("Bye!")
         midi.panic()
 
 def take_from_env(names, env):
@@ -416,18 +423,18 @@ def console(env):
         console.interact()
     except KeyboardInterrupt:
         midi.panic()
-        print "See ya!"
+        print("See ya!")
 
 def setup():
     # need to give some arg or it won't change instruments, "rnd" to randomly choose
     if len(sys.argv) > 1:
-        print "Choosing Instruments from args"
+        print("Choosing Instruments from args")
         choose_instruments(sys.argv[1:])
     elif INSTRUMENTS:
-        print "Choosing Instruments from INSTRUMENTS setting"
+        print("Choosing Instruments from INSTRUMENTS setting")
         choose_instruments(INSTRUMENTS)
     else:
-        print "Leaving instruments the same"
+        print("Leaving instruments the same")
 
 
 def choose_instruments(args): #todo clean up / simplify
@@ -455,11 +462,11 @@ def choose_instruments(args): #todo clean up / simplify
 
     # description
     if user_specified_instruments:
-        print "setting custom instruments", (inst0, inst1)
+        log("setting custom instruments", (inst0, inst1))
     elif do_sug:
-        print "known cool instrument combo", (inst0, inst1)
+        log("known cool instrument combo", (inst0, inst1))
     else:
-        print "experimental random instrument", (inst0, inst1)
+        log("experimental random instrument", (inst0, inst1))
 
     # actually changes patches
     midi.midi_program_change(inst0, chan=0)
@@ -471,12 +478,12 @@ def choose_instruments(args): #todo clean up / simplify
 
 def change_duration(dur):
     global DURATION
-    print "Changing tempo to " + str(dur)
+    log("Changing tempo to " + str(dur))
     DURATION = dur
 
 def mult_duration(durmult):
     global DURATION
-    print "Multiplying tempo by factor of " + str(durmult)
+    log("Multiplying tempo by factor of " + str(durmult))
     DURATION *= durmult
 
 def play_id(strn):
