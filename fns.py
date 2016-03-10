@@ -181,6 +181,38 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
 
 
 
+def ev_func_init(fn):
+
+    # do start tempo change
+    start_dur = get_start_dur(fn)
+    if start_dur is not None:
+        DURATION = start_dur
+
+    # do chord change if any
+    start_chord = get_start_chord(fn)
+    if start_chord:
+        chord = start_chord
+        for e in ev_chord_change(): yield e
+
+    # do instrument change if any
+    start_inst = get_start_instruments(fn)
+    if start_inst is not None:
+        choose_instruments(start_inst)
+
+
+# play function name
+def ev_func_name(fname, pause):
+    print_fname(fname)
+    fname = fname2mus_strn(fname)
+    fname_events = midi.ev_strn(
+        with_pause_after(fname, pause),
+        show_notes = SHOW_NOTES,
+        dur = DURATION,
+        vel = MEL_VEL,
+    )
+    for e in fname_events: yield e
+
+
 # event-stream-based version of play_func
 def ev_func(fn, do_response=None):
 
@@ -189,40 +221,15 @@ def ev_func(fn, do_response=None):
     fname = get_fname(fn)
 
     if not is_lambda(fname):
-
-        # do start tempo change
-        start_dur = get_start_dur(fn)
-        if start_dur is not None:
-            DURATION = start_dur
-
-        # do chord change if any
-        start_chord = get_start_chord(fn)
-        if start_chord:
-            chord = start_chord
-            for e in ev_chord_change(): yield e
-
-        # do instrument change if any
-        start_inst = get_start_instruments(fn)
-        if start_inst is not None:
-            choose_instruments(start_inst)
-
-        # play function name
-        print_fname(fname)
-        fname = fname2mus_strn(fname)
-        pause1 = pause_amt()
-        fname_events = midi.ev_strn(
-            with_pause_after(fname, pause1),
-            show_notes = SHOW_NOTES,
-            dur = DURATION,
-            vel = MEL_VEL,
-        )
+        ev_func_init(fn)
 
         #todo find a simpler way for last_pitch -
             # maybe allow the ev_pitches to write into
             # some shared value, like a list or dict?
             # (maybe not tho, this seems maybe ok)
         last_pitch = None
-        for e in fname_events:
+        pause1 = pause_amt()
+        for e in ev_func_name(fname, pause1):
             last_pitch = midi.maybe_set_pitch(last_pitch, e)
             yield e
 
