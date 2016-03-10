@@ -48,8 +48,8 @@ def play_funcs(env):
         else:
             times = options(1,2,4)
         for x in range(times):
-            midi.playe(eventsg_func(func))
-        midi.playe(eventsg_maybe_delay())
+            midi.playe(ev_func(func))
+        midi.playe(ev_maybe_delay())
 
 def maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
@@ -58,12 +58,12 @@ def maybe_delay():
         delay = '-' * delay_len
         midi.play_strn(delay, show_notes=SHOW_NOTES, vel=MEL_VEL)
 
-def eventsg_maybe_delay():
+def ev_maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
         delay_len = options(8,16,24,32) #,48,64)
         print '.' * delay_len
         delay = '-' * delay_len
-        for e in midi.eventsg_strn(
+        for e in midi.ev_strn(
             delay, show_notes=SHOW_NOTES, vel=MEL_VEL
         ):
             yield e
@@ -182,7 +182,7 @@ def play_fn_response_1(response, pause1=None, prev_pitch=None):
 
 
 # event-stream-based version of play_func
-def eventsg_func(fn, do_response=None):
+def ev_func(fn, do_response=None):
 
     global chord, DURATION
 
@@ -199,13 +199,13 @@ def eventsg_func(fn, do_response=None):
         start_chord = get_start_chord(fn)
         if start_chord:
             chord = start_chord
-            for e in eventsg_chord_change(): yield e
+            for e in ev_chord_change(): yield e
 
         # play function name
         print_fname(fname)
         fname = fname2mus_strn(fname)
         pause1 = pause_amt()
-        fname_events = midi.eventsg_strn(
+        fname_events = midi.ev_strn(
             with_pause_after(fname, pause1),
             show_notes = SHOW_NOTES,
             dur = DURATION,
@@ -213,7 +213,7 @@ def eventsg_func(fn, do_response=None):
         )
 
         #todo find a simpler way for last_pitch -
-            # maybe allow the eventsg to write into
+            # maybe allow the ev_pitches to write into
             # some shared value, like a list or dict?
             # (maybe not tho, this seems maybe ok)
         last_pitch = None
@@ -226,32 +226,32 @@ def eventsg_func(fn, do_response=None):
             do_response = True #coinflip()
         if do_response:
             #todo figure out last_pitch / prev_pitch stuff
-            for e in eventsg_fn_response(fn, pause1=pause1, prev_pitch=last_pitch):
+            for e in ev_fn_response(fn, pause1=pause1, prev_pitch=last_pitch):
                 yield e
 
-def eventsg_fn_response(fn, pause1=None, prev_pitch=None):
+def ev_fn_response(fn, pause1=None, prev_pitch=None):
     if is_function(fn):
         response = fn()
         if isinstance(response, types.GeneratorType):
             for section in response:
-                #new_prev_pitch = eventsg_fn_response_1(section, pause1, prev_pitch)
+                #new_prev_pitch = ev_fn_response_1(section, pause1, prev_pitch)
                 #prev_pitch = new_prev_pitch
                 new_prev_pitch = None
-                for e in eventsg_fn_response_1(
+                for e in ev_fn_response_1(
                     section, pause1, prev_pitch=prev_pitch
                 ):
                     new_prev_pitch = midi.maybe_set_pitch(new_prev_pitch,e)
                     yield e
                 prev_pitch = new_prev_pitch
         else:
-            for e in eventsg_fn_response_1(
+            for e in ev_fn_response_1(
                 response, pause1,
                 prev_pitch = prev_pitch
             ):
                 yield e
 
-def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
-    for e in eventsg_chord_change(): yield e
+def ev_fn_response_1(response, pause1=None, prev_pitch=None):
+    for e in ev_chord_change(): yield e
     print_response(response)
     response = str2mus_strn(response)
 
@@ -259,7 +259,7 @@ def eventsg_fn_response_1(response, pause1=None, prev_pitch=None):
     response = with_pause_after(response, pause2)
 
     if is_string(response):
-        for e in midi.eventsg_strn(
+        for e in midi.ev_strn(
             response,
             show_notes = SHOW_NOTES,
             dur = DURATION, 
@@ -282,15 +282,15 @@ def process_chord_change():
         sounding_chord = chord
         chord = None
 
-def eventsg_chord_change():
+def ev_chord_change():
     global chord, sounding_chord
     if chord is not None:
         if sounding_chord:
-            for e in midi.eventsg_chordname_off(
+            for e in midi.ev_chordname_off(
                 sounding_chord, chan=1, show_notes=SHOW_NOTES
             ):
                 yield e
-        for e in midi.eventsg_chordname_on(
+        for e in midi.ev_chordname_on(
             chord, vel=CHORD_VEL, chan=1, show_notes=SHOW_NOTES
         ):
             yield e

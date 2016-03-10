@@ -2,15 +2,15 @@ TODO
 ====
 
 
-last_pitch passing for eventsg() / playe()
+last_pitch passing for ev_pitches() / playe()
 ------------------------------------------
 fix/figure_out how prev_pitch/last_pitch passing
-should work with eventsg-style generator loops.
-when you eventsg() 2 separate events loops in series,
+should work with ev_pitches()-style generator loops.
+when you ev_pitches() 2 separate events loops in series,
 you have an interesting conundrum -
-    the 2nd eventsg(), which accepts prev_pitch,
+    the 2nd ev_pitches(), which accepts prev_pitch,
     is already created prior to you really knowing
-    the last_pitch of the first eventsg(), which
+    the last_pitch of the first ev_pitches(), which
     you get as the return val of playe()
 
 

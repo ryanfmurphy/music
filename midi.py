@@ -120,7 +120,7 @@ def do_hold_note(new_note): # decide whether to hold existing note
     return new_note in [None,'-',',',"'"]
 
 
-'''low-level midi message functionality'''
+'low-level midi message functionality'
 
 def midi_note_on(pitch, vel, chan=0):
     control = [0x90 + chan, pitch, vel]
@@ -141,10 +141,6 @@ def midi_program_change(instrument_no, chan=0):
 
 panic = midi_panic
 prog_chg = midi_program_change
-
-
-'higher level functionality - octave offset & some rest / note holding logic'
-
 
 
 #todo clear the notes on KeyboardInterrupt or something
@@ -186,6 +182,10 @@ SHOW_NOTES = True
 SHOW_NOTE_NAMES = True
 NOTE_DISPLAYER = NoteDisplayer()
 
+
+'higher level functionality - octave offset & some rest / note holding logic'
+
+
 def note_on(n, vel=VELOCITY, oct=4, chan=0,
             show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
     pitch = up(n, oct*12)
@@ -213,7 +213,7 @@ def rand_inst(chan=0):
 def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
     if dur is None: dur = DURATION
     playe(
-        eventsg(
+        ev_pitches(
             ns, vel=vel, oct=oct, dur=dur,
             leave_sounding=leave_sounding, chan=chan
         )
@@ -222,7 +222,7 @@ def play(ns, dur=DURATION, vel=VELOCITY, oct=4, leave_sounding=False, chan=0):
 
 def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     return playe(
-        eventsg_chord_on(
+        ev_chord_on(
             ns, vel=vel, oct=oct,
             chan=chan, show_notes=show_notes
         )
@@ -230,13 +230,13 @@ def chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
 
 def chord_off(ns, oct=4, chan=0, show_notes=None):
     return playe(
-        eventsg_chord_off(ns, oct=oct, chan=chan, show_notes=show_notes)
+        ev_chord_off(ns, oct=oct, chan=chan, show_notes=show_notes)
     )
 
 
 def chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     return playe(
-        eventsg_chordstrn_on(
+        ev_chordstrn_on(
             chordstrn, vel=vel, oct=oct,
             chan=chan, show_notes=show_notes
         )
@@ -249,61 +249,61 @@ def chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
 
 def chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     return playe(
-        eventsg_chordname_on(chordname, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
+        ev_chordname_on(chordname, vel=vel, oct=oct, chan=chan, show_notes=show_notes)
     )
 
 def chordname_off(chordname, oct=4, chan=0, show_notes=None):
     return playe(
-        eventsg_chordname_off(chordname, oct=oct, chan=chan, show_notes=show_notes)
+        ev_chordname_off(chordname, oct=oct, chan=chan, show_notes=show_notes)
     )
 
 
-def eventsg_chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def ev_chord_on(ns, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
             yield ('note_on', n, vel, oct, chan, show_notes)
 
-def eventsg_chord_off(ns, oct=4, chan=0, show_notes=None):
+def ev_chord_off(ns, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if ns:
         for n in ns:
             yield ('note_off', n, oct, chan, show_notes)
 
-def eventsg_chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def ev_chordstrn_on(chordstrn, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        for e in eventsg_chord_on(
+        for e in ev_chord_on(
             pitches, vel=vel, oct=oct, chan=chan, show_notes=show_notes
         ):
             yield e
 
-def eventsg_chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
+def ev_chordstrn_off(chordstrn, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordstrn:
         pitches = strn2pitches(chordstrn)
-        for e in eventsg_chord_off(
+        for e in ev_chord_off(
             pitches, oct=oct, chan=chan, show_notes=show_notes
         ):
             yield e
 
-def eventsg_chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
+def ev_chordname_on(chordname, vel=VELOCITY, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            for e in eventsg_chordstrn_on(
+            for e in ev_chordstrn_on(
                 chordstrn, vel=vel, oct=oct, chan=chan, show_notes=show_notes
             ):
                 yield e
 
-def eventsg_chordname_off(chordname, oct=4, chan=0, show_notes=None):
+def ev_chordname_off(chordname, oct=4, chan=0, show_notes=None):
     if show_notes is None: show_notes = SHOW_NOTES
     if chordname:
         if chordname in chordtxt:
             chordstrn = chordtxt[chordname]
-            for e in eventsg_chordstrn_off(
+            for e in ev_chordstrn_off(
                 chordstrn, oct=oct, chan=chan, show_notes=show_notes
             ):
                 yield e
@@ -396,23 +396,23 @@ def get_scale(scale_type_or_scale):
 
 'scale ascending and descending'
 
-def eventsg_scale(scale, dur=DURATION, omit_last=False, leave_sounding=False):
+def ev_scale(scale, dur=DURATION, omit_last=False, leave_sounding=False):
     'scale can be a scale_type or a scale itself'
     scale = get_scale(scale)
     'ascending'
-    for e in eventsg(scale, dur=dur, leave_sounding=leave_sounding):
+    for e in ev_pitches(scale, dur=dur, leave_sounding=leave_sounding):
         yield e
     'descending'
     if omit_last:
         desc_scale = scale[-2:0:-1]
     else:
         desc_scale = scale[-2::-1]
-    for e in eventsg(desc_scale, dur=dur, leave_sounding=leave_sounding):
+    for e in ev_pitches(desc_scale, dur=dur, leave_sounding=leave_sounding):
         yield e
 
 def play_scale(scale, dur=DURATION, omit_last=False):
     playe(
-        eventsg_scale(scale, dur, omit_last)
+        ev_scale(scale, dur, omit_last)
     )
 
 def choose_some_scales():
@@ -514,7 +514,7 @@ def rand(): # can be passed as duration for a random "wind chimes" effect
     #todo allow play() to leave a note followed by '-' playing but then still turn it off when it's done
 
 '''
-* #todo make a function that takes an eventsg and filters out all the notes_off events
+* #todo make a function that takes an ev_pitches and filters out all the notes_off events
 '''
 def remove_note_offs(events):
     for event in events:
@@ -886,12 +886,12 @@ def strn2numbers(strn):
 def strn2pitches(strn, prev_pitch=None):
     return close_big_intervals(strn2numbers(strn), prev_pitch)
 
-def eventsg_strn(strn, dur=DURATION, leave_sounding=False,
+def ev_strn(strn, dur=DURATION, leave_sounding=False,
                  show_notes=None, prev_pitch=None,
                  vel=VELOCITY, oct=4):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
-    return eventsg(
+    return ev_pitches(
         strn2pitches(strn, prev_pitch),
         dur=dur, vel=vel, oct=oct,
         leave_sounding=leave_sounding,
@@ -907,7 +907,7 @@ def play_strn(strn, dur=DURATION, leave_sounding=False,
     else:
         # playe returns the last pitch for continuity with subsequent melodies
         return playe(
-            eventsg_strn(strn,
+            ev_strn(strn,
                          dur=dur,
                          leave_sounding=leave_sounding,
                          show_notes=show_notes,
@@ -916,7 +916,7 @@ def play_strn(strn, dur=DURATION, leave_sounding=False,
             )
         )
 
-estrn = eventsg_strn
+estrn = ev_strn
 pstrn = play_strn
 
 
@@ -949,7 +949,7 @@ bach6strn = [
 ]
 
 # Q. How does this compare to using zip_events later?
-def eventsg_parts(parts, octaves=None, dur=DURATION,
+def ev_parts(parts, octaves=None, dur=DURATION,
                   vel=VELOCITY, show_notes=None):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
@@ -957,21 +957,21 @@ def eventsg_parts(parts, octaves=None, dur=DURATION,
         for i,part in enumerate(parts):
             parts[i] = up(parts[i], octaves[i]*12)
     combined = izip(*parts)
-    for e in eventsg(combined, dur=dur, vel=vel,
+    for e in ev_pitches(combined, dur=dur, vel=vel,
                      show_notes=show_notes):
         yield e
 
-def eventsg_strns(strns, octaves=None, dur=DURATION,
+def ev_strns(strns, octaves=None, dur=DURATION,
                   vel=VELOCITY, show_notes=None):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     parts = [strn2pitches(s) for s in strns]
-    for e in eventsg_parts(parts, octaves=octaves, dur=dur,
+    for e in ev_parts(parts, octaves=octaves, dur=dur,
                            vel=vel, show_notes=show_notes):
         yield e
 
 def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
-    playe(eventsg_strns(strns, octaves=octaves, dur=dur, vel=vel))
+    playe(ev_strns(strns, octaves=octaves, dur=dur, vel=vel))
 
 
 def play_whatever(thing, show_notes=None):
@@ -1069,14 +1069,14 @@ def show_list_spatially(positions, held_positions=None, offset=0, show_note_name
 
 iter_type = type(iter([0]))
 
-def eventsg(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
+def ev_pitches(ns, dur=DURATION, vel=VELOCITY, oct=4, chan=0,
             sounding_notes = None, leave_sounding = False,
             show_notes = None, show_note_names = True
            ):
 
     'this generator, treats note on and note off as separate events, and has sleep events in between'
 
-    '#note: this eventsg works pretty well! needs some cleanup'
+    '#note: this ev_pitches works pretty well! needs some cleanup'
 
     "#todo there's an issue where if one voice runs out of notes before the other\
     it will leave the last note hanging.  Passing 'None' should stop the voice"
@@ -1655,19 +1655,19 @@ def play_all_of_me():
 
 def all_of_me_e():
     if coinflip():
-        return eventsg_cp(all_of_me, pattern=[0,2,1,2]*2, dur=swung_dur(.4,.2).next)
+        return ev_cp(all_of_me, pattern=[0,2,1,2]*2, dur=swung_dur(.4,.2).next)
     else:
-        return eventsg_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),([0,1],0),(2,0),(0,1)])
+        return ev_cp(all_of_me, oct_pattern=[(0,0),(2,0),([0,1],0),(2,0),(0,1),([0,1],0),(2,0),(0,1)])
 
 def play_valentine():
     playe(valentine_e())
 
 def valentine_e():
-    return eventsg_cp(my_funny_valentine, pattern=[0,1,2,3]*2, dur=swung_dur(.4,.2).next)
+    return ev_cp(my_funny_valentine, pattern=[0,1,2,3]*2, dur=swung_dur(.4,.2).next)
 
 def play_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
     return playe(
-        eventsg_cp(chord_progression, times=times, pattern=pattern, oct_pattern=oct_pattern, dur=dur)
+        ev_cp(chord_progression, times=times, pattern=pattern, oct_pattern=oct_pattern, dur=dur)
     )
 
 def expand_chord(chord, pattern=None, oct_pattern=None):
@@ -1680,11 +1680,11 @@ def expand_chord(chord, pattern=None, oct_pattern=None):
     else:
         return strn2pitches(chordtxt[chord])
 
-def eventsg_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
+def ev_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
     for i in range(times):
         for chord in chord_progression:
             pitches = expand_chord(chord, pattern=pattern, oct_pattern=oct_pattern)
-            for event in eventsg(pitches, dur=dur):
+            for event in ev_pitches(pitches, dur=dur):
                 yield event
 
 def apply_pattern(idx_pattern, bank):
@@ -1873,8 +1873,8 @@ drum_beats = [
 def play_drums(dur=DURATION, vel=VELOCITY):
     beat = random.choice(drum_beats)
     while True:
-        playe(eventsg(beat, chan=DRUM_CHAN, vel=vel), silence_on_abort=False)
-    #drum_loop_events = icycle(eventsg(beat, chan=DRUM_CHAN, vel=vel))
+        playe(ev_pitches(beat, chan=DRUM_CHAN, vel=vel), silence_on_abort=False)
+    #drum_loop_events = icycle(ev_pitches(beat, chan=DRUM_CHAN, vel=vel))
     #playe(drum_loop_events)
 
 
