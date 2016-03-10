@@ -298,17 +298,6 @@ def ev_chord_change():
         sounding_chord = chord
         chord = None
 
-def get_start_chord(fn):
-    if hasattr(fn, 'chord'):
-        if is_function(fn.chord):
-            return fn.chord()
-        else:
-            return fn.chord
-
-def get_start_dur(fn):
-    if hasattr(fn, 'duration'):
-        return fn.duration
-
 def chord_offset():
     return RESPONSE_OFFSET / 2
 
@@ -552,17 +541,40 @@ def mult_duration(durmult):
 def play_id(strn):
     midi.play_strn(fname2mus_strn(strn), show_notes=SHOW_NOTES, vel=MEL_VEL)
 
-# the start_chord decorator
+
+# @start_chord decorator
 def start_chord(the_chord):
     def outer(func):
         func.chord = the_chord
         return func
     return outer
 
-# the start_chord decorator
+# @start_dur decorator
 def start_dur(dur):
     def outer(func):
         func.duration = dur
         return func
     return outer
+
+# @start_instrument decorator
+def start_instrument(dur):
+    def outer(func):
+        func.instrument = dur
+        return func
+    return outer
+
+def get_start_chord(fn):
+    if hasattr(fn, 'chord'):
+        if is_function(fn.chord):
+            return fn.chord()
+        else:
+            return fn.chord
+
+def get_start_dur(fn):
+    if hasattr(fn, 'duration'):
+        return fn.duration
+
+def get_start_instrument(fn):
+    if hasattr(fn, 'instrument'):
+        return fn.instrument
 
