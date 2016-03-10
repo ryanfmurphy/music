@@ -2,14 +2,15 @@ TODO
 ====
 
 
+multiple decorators - not all seem to run all the time?
+    like chord + tempo change + instrument:
+Are decorators even working at all anymore??
+
+
 musictxt - multiple parts playing at a time
 
 
 NoteDisplayer - color gets occluded by other channel
-
-
-multiple decorators - not all seem to run all the time?
-    like chord + tempo change + instrument:
 
 
 doublecheck - leading hyphen means no pause?

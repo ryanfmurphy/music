@@ -12,8 +12,8 @@ SOMETIMES_DELAY = True
 PAUSE_DISABLED = True
 INSTRUMENTS = None
 SHOW_NOTES = True
-midi.SHOW_NOTE_NAMES = True
-VERBOSE = True
+midi.SHOW_NOTE_NAMES = False
+VERBOSE = False
 
 chord = None
 sounding_chord = None
@@ -128,21 +128,25 @@ def play_func(fn, do_response=None):
 
 
 def ev_func_init(fn):
+    global chord, DURATION
 
     # do start tempo change
     start_dur = get_start_dur(fn)
     if start_dur is not None:
+        #log('set DURATION',duration)
         DURATION = start_dur
 
     # do chord change if any
     start_chord = get_start_chord(fn)
     if start_chord:
+        #log('set chord',chord)
         chord = start_chord
         for e in ev_chord_change(): yield e
 
     # do instrument change if any
     start_inst = get_start_instruments(fn)
     if start_inst is not None:
+        #log('set INSTRUMENTS',start_inst)
         choose_instruments(start_inst)
 
 
@@ -161,12 +165,13 @@ def ev_func_name(fname, pause):
 # event-stream-based version of play_func
 def ev_func(fn, do_response=None):
 
-    global chord, DURATION
+    global chord, DURATION #todo not needed anymore, ev_init has it?
 
     fname = get_fname(fn)
 
     if not is_lambda(fname):
-        ev_func_init(fn)
+        for e in ev_func_init(fn):
+            yield e
 
         #todo find a simpler way for last_pitch -
             # maybe allow the ev_pitches to write into
@@ -493,6 +498,7 @@ def play_id(strn):
 # @start_chord decorator
 def start_chord(the_chord):
     def outer(func):
+        #log('@start_chord',the_chord)
         func.chord = the_chord
         return func
     return outer
@@ -500,6 +506,7 @@ def start_chord(the_chord):
 # @start_dur decorator
 def start_dur(dur):
     def outer(func):
+        #log('@start_dur',dur)
         func.duration = dur
         return func
     return outer
@@ -507,6 +514,7 @@ def start_dur(dur):
 # @start_instrument decorator
 def start_instruments(inst):
     def outer(func):
+        #log('@start_instrument',inst)
         func.instruments = inst
         return func
     return outer
