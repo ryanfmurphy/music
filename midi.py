@@ -152,14 +152,16 @@ class NoteDisplayer:
 
     #todo accumulate positions before you print a line of notes
     #   (allowing multiple zipped events generators to be properly displayed
-    def start_note(self, note_pos):
-        self.notes.add(note_pos)
+    def start_note(self, note_pos, chan):
+        note = (note_pos,chan)
+        self.notes.add(note)
         # allow rearticulation by not considering it a "held note"
         # (remove from prev_notes)
-        self.prev_notes.discard(note_pos)
+        self.prev_notes.discard(note)
 
-    def release_note(self, note_pos):
-        self.notes.discard(note_pos)
+    def release_note(self, note_pos, chan):
+        note = (note_pos,chan)
+        self.notes.discard(note)
 
     def show_accumulated_notes(self):
         #todo do I really need the list() conversion?
@@ -170,8 +172,11 @@ class NoteDisplayer:
         #print('notes',self.notes) 
         #print('prev',self.prev_notes) 
         #print('held',held_notes) 
+        held_note_positions = {n[0] for n in held_notes}
         print(
-            show_list_spatially(notes, list(held_notes))
+            show_notes_spatially(
+                notes, list(held_note_positions)
+            )
         )
         self.prev_notes = self.notes
         self.notes = copy.copy(self.notes)
@@ -192,7 +197,7 @@ def note_on(n, vel=VELOCITY, oct=4, chan=0,
     if not is_silent(pitch):
         midi_note_on(pitch, vel, chan=chan)
     if show_notes:
-        NOTE_DISPLAYER.start_note(pitch)
+        NOTE_DISPLAYER.start_note(pitch, chan)
 
 def note_off(n, oct=4, chan=0,
              show_notes=SHOW_NOTES, show_note_names=SHOW_NOTE_NAMES):
@@ -200,7 +205,7 @@ def note_off(n, oct=4, chan=0,
     if not is_silent(pitch): # if the pitch was silent, no need to silence
         midi_note_off(pitch, chan=chan)
     if show_notes:
-        NOTE_DISPLAYER.release_note(pitch)
+        NOTE_DISPLAYER.release_note(pitch, chan)
 
 
 
@@ -1046,8 +1051,16 @@ def iterable(x):
 
 
 
-def show_list_spatially(positions, held_positions=None, offset=0, show_note_names=False):
-    dim, undim = '\033[2m', '\033[0m'
+def show_notes_spatially(positions, held_positions=None, offset=0, show_note_names=False):
+    nocolor = '\033[0m'
+    gray = '\033[2m'
+    red = '\033[91m'
+    green = '\033[92m'
+    yellow = '\033[93m'
+    magenta = '\033[94m'
+    light_magenta = '\033[95m'
+    cyan = '\033[96m'
+
     max_width = 80
     chars = [' '] * max_width
     if held_positions:
@@ -1055,15 +1068,25 @@ def show_list_spatially(positions, held_positions=None, offset=0, show_note_name
             if isinstance(pos, int):
                 adjusted_pos = pos + offset
                 if 0 <= adjusted_pos < max_width:
-                    chars[adjusted_pos] = dim + '|' + undim
+                    char = '|'
+                chars[adjusted_pos] = gray + char + nocolor
     for pos in positions:
+        if isinstance(pos, tuple):
+            pos, chan = pos[0], pos[1]
+        else:
+            chan = 0
         if isinstance(pos, int):
             adjusted_pos = pos + offset
             if 0 <= adjusted_pos < max_width:
                 if show_note_names:
-                    chars[adjusted_pos] = note_name(pos)
+                    char = note_name(pos)
                 else:
-                    chars[adjusted_pos] = '●'
+                    char = '●'
+                if chan == 1:
+                    chan_col = magenta
+                else:
+                    chan_col = green
+                chars[adjusted_pos] = chan_col + char + nocolor
     strn = ''.join(chars)
     return strn
 
