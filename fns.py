@@ -201,6 +201,11 @@ def ev_func(fn, do_response=None):
             chord = start_chord
             for e in ev_chord_change(): yield e
 
+        # do instrument change if any
+        start_inst = get_start_instruments(fn)
+        if start_inst is not None:
+            choose_instruments(start_inst)
+
         # play function name
         print_fname(fname)
         fname = fname2mus_strn(fname)
@@ -484,15 +489,8 @@ def setup():
     else:
         print "Leaving instruments the same"
 
-#INST0 = 19
-#INST1 = 0
 
 def choose_instruments(args): #todo clean up / simplify
-    #global INST0, INST1
-    #INST0 += 1
-    #midi.midi_program_change(INST0, chan=0)
-    #print (INST0, INST1)
-    #return
 
     sug0,sug1 = midi.cool_inst_combo()
     do_sug = True # coinflip()
@@ -527,6 +525,9 @@ def choose_instruments(args): #todo clean up / simplify
     midi.midi_program_change(inst0, chan=0)
     midi.midi_program_change(inst1, chan=1)
 
+    # update INSTRUMENTS var
+    INSTRUMENTS = (inst0,inst1)
+
 
 def change_duration(dur):
     global DURATION
@@ -557,9 +558,9 @@ def start_dur(dur):
     return outer
 
 # @start_instrument decorator
-def start_instrument(dur):
+def start_instruments(inst):
     def outer(func):
-        func.instrument = dur
+        func.instruments = inst
         return func
     return outer
 
@@ -574,7 +575,7 @@ def get_start_dur(fn):
     if hasattr(fn, 'duration'):
         return fn.duration
 
-def get_start_instrument(fn):
-    if hasattr(fn, 'instrument'):
-        return fn.instrument
+def get_start_instruments(fn):
+    if hasattr(fn, 'instruments'):
+        return fn.instruments
 
