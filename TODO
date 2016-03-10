@@ -2,10 +2,17 @@ TODO
 ====
 
 
-doublecheck - leading hyphen means no pause?
-
-
 musictxt - multiple parts playing at a time
+
+
+NoteDisplayer - color gets occluded by other channel
+
+
+multiple decorators - not all seem to run all the time?
+    like chord + tempo change + instrument:
+
+
+doublecheck - leading hyphen means no pause?
 
 
 add drums playing along with stuff

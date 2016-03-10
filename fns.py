@@ -13,7 +13,7 @@ PAUSE_DISABLED = True
 INSTRUMENTS = None
 SHOW_NOTES = True
 midi.SHOW_NOTE_NAMES = True
-VERBOSE = False
+VERBOSE = True
 
 chord = None
 sounding_chord = None
