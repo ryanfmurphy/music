@@ -12,6 +12,9 @@ from pprint import pprint as pp
 import copy
 
 
+DURATION = .2
+VELOCITY = 100
+
 def close_midi_handler(signal, frame):
     global midiout
     del midiout
@@ -29,9 +32,6 @@ def sleep(dur, show_notes=None):
 
 # I kept the option of a verbose `sleep()` function so that I could see the
 # music outputted to the screen:
-
-DURATION = .2
-VELOCITY = 100
 
 def verbose_sleep(dur):
     try: sleep.ticks
@@ -97,6 +97,7 @@ def midi_init():
     if available_ports:
         midiout.open_port(0)
     else:
+        print("No midi port available, opening virtual port")
         midiout.open_virtual_port("My virtual output")
 
     return midiout
