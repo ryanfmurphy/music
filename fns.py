@@ -444,6 +444,8 @@ def setup():
 
 def choose_instruments(args): #todo clean up / simplify
 
+    if args == 'rnd': args = ['rnd']
+
     sug0,sug1 = midi.cool_inst_combo()
     do_sug = True # coinflip()
 

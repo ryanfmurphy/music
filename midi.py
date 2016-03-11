@@ -1051,6 +1051,7 @@ def iterable(x):
 
 
 def show_notes_spatially(positions, held_positions=None, offset=0, show_note_names=False):
+    #todo allow brighter colors / higher priority channels to take precedence
     nocolor = '\033[0m'
     gray = '\033[2m'
     red = '\033[91m'
