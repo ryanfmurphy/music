@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*- 
 
+from __future__ import print_function
 import rtmidi
 import itertools, collections
 import time
@@ -14,6 +15,12 @@ import copy
 
 DURATION = .2
 VELOCITY = 100
+
+
+def debug_log(*args):
+    pass
+    #print(*args)
+
 
 def close_midi_handler(signal, frame):
     global midiout
@@ -1899,12 +1906,23 @@ drum_beats = [
 ]
 
 
+def ev_drums(dur=DURATION, vel=VELOCITY):
+    beat = random.choice(drum_beats)
+    while True:
+        for e in ev_pitches(beat, chan=DRUM_CHAN, vel=vel):
+            yield e
+
 def play_drums(dur=DURATION, vel=VELOCITY):
+    return playe(ev_drums(dur,vel))
+
+'''
+def play_drums(dur=DURATION, vel=VELOCITY): #todo need this anymore?
     beat = random.choice(drum_beats)
     while True:
         playe(ev_pitches(beat, chan=DRUM_CHAN, vel=vel), silence_on_abort=False)
     #drum_loop_events = icycle(ev_pitches(beat, chan=DRUM_CHAN, vel=vel))
     #playe(drum_loop_events)
+'''
 
 
 
@@ -1939,19 +1957,26 @@ def zip_events(*event_streams):
 
         "now everything's either a sleep or it's done"
         'deal with sleep events now that all event streams are either sleeping or StopIteration'
+        #todo fix the swing - now that get_sleep_time uses get_dur, it can use the generator.next
+            # therefore we must cache the result instead of using it multiple times!
         sleep_events = [event for event in next_event if is_sleep_event(event)]
         if len(sleep_events) == 0: break
         min_sleep_amt = min(get_sleep_time(event) for event in sleep_events)
         yield ('sleep', min_sleep_amt); 'do the minimum sleep'
 
         'subtract that minimum sleep amt from all the other sleeps'
+        debug_log("supposedly all these are sleep events:")
         for i,event in enumerate(next_event):
+            debug_log("i:",i,"event:",event)
             if event is None:
+                debug_log("event is None, pass")
                 pass
             elif get_sleep_time(event) == min_sleep_amt:
+                debug_log("get_sleep_time(event) == min_sleep_amt, next_event = None")
                 next_event[i] = None
             else: # we have bigger sleep, subtract the small sleep (replace event)
                 current_sleep_time = get_sleep_time(next_event[i])
+                debug_log("about to try to subtract sleep times: " + repr(current_sleep_time) + " - " + repr(min_sleep_amt))
                 next_event[i] = ('sleep', current_sleep_time - min_sleep_amt)
 
 zipe = zip_events
@@ -1965,7 +1990,7 @@ def is_sleep_event(event):
 
 def get_sleep_time(event):
     if is_sleep_event(event):
-        return event[1]
+        return get_dur(event[1])
     else:
         return None
 

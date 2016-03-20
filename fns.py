@@ -44,7 +44,7 @@ def get_funcs(env):
     return {k:v for k,v in env.items()
             if is_function(v)}
 
-def play_funcs(env):
+def play_funcs(env): #todo need this anymore? (ev_funcs now)
     if is_module(env):
         env = env.__dict__
     funcs = get_funcs(env).items()
@@ -58,8 +58,24 @@ def play_funcs(env):
             play_func(func)
         maybe_delay()
 
-def maybe_delay():
+def maybe_delay(): #todo need this anymore?
     return midi.playe(ev_maybe_delay())
+
+def ev_funcs(env):
+    if is_module(env):
+        env = env.__dict__
+    funcs = get_funcs(env).items()
+    random.shuffle(funcs)
+    for func_name,func in funcs:
+        if coinflip():
+            times = 1
+        else:
+            times = options(1,2,4)
+        for x in range(times):
+            for e in ev_func(func):
+                yield e
+        for e in ev_maybe_delay():
+            yield e
 
 def ev_maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
@@ -121,10 +137,8 @@ def get_fname(fn):
         return fn
 
 
-def play_func(fn, do_response=None):
-    return midi.playe(
-        ev_func(fn, do_response)
-    )
+def play_func(fn, do_response=None): #todo will we need this anymore? (now we have ev_funcs)
+    return midi.playe(ev_func(fn, do_response))
 
 
 def ev_func_init(fn):
@@ -235,9 +249,7 @@ def ev_fn_response_1(response, pause1=None, prev_pitch=None):
 
 
 def process_chord_change():
-    return midi.playe(
-        ev_chord_change()
-    )
+    return midi.playe(ev_chord_change())
 
 def ev_chord_change():
     global chord, sounding_chord
@@ -283,10 +295,31 @@ def some_end_parts(*parts):
     else:
         return my_parts
 
-def goof_around(env):
+'''
+def goof_around(env): #todo need this anymore?
     try:
         while True:
             play_funcs(env)
+    except KeyboardInterrupt:
+        print("Bye!")
+        midi.panic()
+'''
+
+def ev_goof_around(env, drums=False):
+    while True:
+        if drums:
+            events = midi.zipe(
+                ev_funcs(env),
+                midi.ev_drums(),
+            )
+        else:
+            events = ev_funcs(env)
+        for e in events:
+            yield e
+
+def goof_around(env):
+    try:
+        return midi.playe(ev_goof_around(env))
     except KeyboardInterrupt:
         print("Bye!")
         midi.panic()
