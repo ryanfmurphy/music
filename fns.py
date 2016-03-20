@@ -317,9 +317,9 @@ def ev_goof_around(env, drums=False):
         for e in events:
             yield e
 
-def goof_around(env):
+def goof_around(env, drums=False):
     try:
-        return midi.playe(ev_goof_around(env))
+        return midi.playe(ev_goof_around(env, drums=drums))
     except KeyboardInterrupt:
         print("Bye!")
         midi.panic()

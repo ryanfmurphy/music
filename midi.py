@@ -157,7 +157,7 @@ class NoteDisplayer:
         self.notes = set()
         self.prev_notes = set()
 
-    #todo accumulate positions before you print a line of notes
+    # accumulate positions before printing a line of notes
     #   (allowing multiple zipped events generators to be properly displayed
     def start_note(self, note_pos, chan):
         note = (note_pos,chan)
@@ -1057,6 +1057,7 @@ def iterable(x):
 
 
 
+#todo absorb show_notes_spatially() into NoteDisplayer class?
 def show_notes_spatially(positions, held_positions=None, offset=0, show_note_names=False):
     #todo allow brighter colors / higher priority channels to take precedence
     nocolor = '\033[0m'
@@ -1089,10 +1090,12 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
                     char = note_name(pos)
                 else:
                     char = '●'
-                if chan == 1:
-                    chan_col = magenta
-                else:
-                    chan_col = green
+
+                # color
+                if   chan == 1:         chan_col = magenta
+                elif chan == DRUM_CHAN: chan_col = red
+                else:                   chan_col = green
+
                 chars[adjusted_pos] = chan_col + char + nocolor
     strn = ''.join(chars)
     return strn
