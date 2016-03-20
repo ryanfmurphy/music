@@ -1211,39 +1211,6 @@ def get_lispy_funcall_pitch(e):
     if e[0] == 'note_on':
         return e[1]
 
-'-- Fri Jun 5 2015 --'
-
-# whoa, generators tripping me out!
-# trying to figure out how sending and receiving works
-
-##todo figure out how to allow me to type chars in vim and have it play notes
-#def yield_me():
-#    i = 0
-#    while True:
-#        x = (yield i)
-#        yield x
-#        i += 1
-#
-#feed_me_chars = []
-#def read_slowly_from_chars():
-#    global feed_me_chars
-#    ptr = 0
-#    while True:
-#        print('loop')
-#        print(feed_me_chars, ptr)
-#        if len(feed_me_chars) > ptr:
-#            print(' more!')
-#            note_char = feed_me_chars[ptr]
-#            print(' yield!')
-#            yield note_char
-#            print(' ptr++')
-#            ptr += 1
-#        else:
-#            sleep(.1)
-#ReadSlowly = read_slowly_from_chars()
-
-
-
 '-- Mon Jun 8 2015 --'
 
 chorales = {
