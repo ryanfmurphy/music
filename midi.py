@@ -1071,6 +1071,7 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
 
     max_width = 80
     chars = [' '] * max_width
+    chans = [None] * max_width
     if held_positions:
         for pos in held_positions:
             if isinstance(pos, int):
@@ -1096,7 +1097,9 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
                 elif chan == DRUM_CHAN: chan_col = red
                 else:                   chan_col = green
 
-                chars[adjusted_pos] = chan_col + char + nocolor
+                if chans[adjusted_pos] is None or chan < chans[adjusted_pos]: # lower channels take priority
+                    chars[adjusted_pos] = chan_col + char + nocolor
+                    chans[adjusted_pos] = chan
     strn = ''.join(chars)
     return strn
 

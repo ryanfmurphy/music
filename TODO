@@ -1,27 +1,9 @@
 TODO
 ====
 
+* doublecheck - leading hyphen means no pause?
 
-fix issue with swung duration in zip_events
+* global transpose (within fns.py interface)
 
-
-NoteDisplayer - color gets occluded by other channel
-
-
-doublecheck - leading hyphen means no pause?
-
-
-add drums playing along with stuff
-
-
-global transpose (within fns.py interface)
-
-
-some examples in the README.md of how to use this thing
-
-
-DONE
-----
-
-portability - include strict_typing.py in project or stop using it
+* some examples in the README.md of how to use this thing
 
