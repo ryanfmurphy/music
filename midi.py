@@ -1898,10 +1898,15 @@ def play_drums(dur=DURATION, vel=VELOCITY): #todo need this anymore?
 
 
 
-def zip_events(*event_streams):
+def zip_events(*event_streams, **kwargs):
     'combine 2 event streams, splitting the "sleep" commands if needed to give each event its proper timing'
     stream_done = [False for i in event_streams]
     next_event = [None for i in event_streams]
+
+    # optional - tracks that loop infinitely and therefore 
+    #            shouldn't be played all the way to finish
+    #            (set of idx's into `event_streams`)
+    dont_finish = kwargs.get('dont_finish', set())
 
     while True:
 
@@ -1925,12 +1930,28 @@ def zip_events(*event_streams):
         # now everything's either a sleep or it's done
         # deal with sleep events now that all event streams are either sleeping or StopIteration
 
-        #todo fix the swing - now that get_sleep_time uses get_dur, it can use the generator.next
-            # therefore we must cache the result instead of using it multiple times!
-        sleep_events = [event for event in next_event if is_sleep_event(event)]
+        streams_not_done = set(
+            x[0] for x in enumerate(stream_done)
+                 if not x[1]
+        )
+        debug_log("streams_not_done", streams_not_done)
+        streams_not_done_that_matter \
+            = streams_not_done - dont_finish
+        debug_log("streams_not_done_that_matter", streams_not_done_that_matter)
+        if len(streams_not_done_that_matter) == 0:
+            break
+
+        sleep_events = [
+            event for event in next_event
+            if is_sleep_event(event)
+        ]
         if len(sleep_events) == 0: break
-        min_sleep_amt = min(get_sleep_time(event) for event in sleep_events)
-        yield ('sleep', min_sleep_amt); 'do the minimum sleep'
+        min_sleep_amt = min(
+            get_sleep_time(event)
+            for event in sleep_events
+        )
+        # do the minimum sleep
+        yield ('sleep', min_sleep_amt)
 
         # subtract that minimum sleep amt from all the other sleeps
         debug_log("supposedly all these are sleep events:")
