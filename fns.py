@@ -3,6 +3,7 @@ import midi
 from isness import *
 import types, random, code, ast, _ast, readline, sys, os, atexit
 from strict_typing import types as typerule
+import itertools
 
 MEL_VEL = 110
 CHORD_VEL = 95
@@ -61,7 +62,7 @@ def play_funcs(env): #todo need this anymore? (ev_funcs now)
 def maybe_delay(): #todo need this anymore?
     return midi.playe(ev_maybe_delay())
 
-def ev_funcs(env):
+def ev_funcs(env, drums=False):
     if is_module(env):
         env = env.__dict__
     funcs = get_funcs(env).items()
@@ -72,7 +73,15 @@ def ev_funcs(env):
         else:
             times = options(1,2,4)
         for x in range(times):
-            for e in ev_func(func):
+            if drums:
+                events = midi.zipe(
+                    ev_func(func),
+                    midi.ev_drums(),
+                    dont_finish={1}
+                )
+            else:
+                events = ev_func(func)
+            for e in events:
                 yield e
         for e in ev_maybe_delay():
             yield e
