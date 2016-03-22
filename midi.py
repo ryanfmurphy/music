@@ -1906,27 +1906,25 @@ def zip_events(*event_streams):
     while True:
 
         still_finding_nonsleep_events = True
-
         while still_finding_nonsleep_events:
-
-            still_finding_nonsleep_events = False; "until proven True"
-
+            still_finding_nonsleep_events = False # until proven True
             for i, event_stream in enumerate(event_streams):
-                'if needed, get event from this event_stream if any'
+                # if needed, get event from this event_stream if any
                 if next_event[i] is None and not stream_done[i]:
                     try:
-                        next_event[i] = event_stream.next()
+                        # solidify so any swung_dur funcs are already called
+                        next_event[i] = solidify_event( event_stream.next() )
                     except StopIteration:
                         stream_done[i] = True
-
-                'go through all non-sleep events with no hesitation'
+                # go through all non-sleep events with no hesitation
                 if next_event[i] is not None and not is_sleep_event(next_event[i]):
                     yield next_event[i]
                     still_finding_nonsleep_events = True
                     next_event[i] = None
 
-        "now everything's either a sleep or it's done"
-        'deal with sleep events now that all event streams are either sleeping or StopIteration'
+        # now everything's either a sleep or it's done
+        # deal with sleep events now that all event streams are either sleeping or StopIteration
+
         #todo fix the swing - now that get_sleep_time uses get_dur, it can use the generator.next
             # therefore we must cache the result instead of using it multiple times!
         sleep_events = [event for event in next_event if is_sleep_event(event)]
@@ -1934,7 +1932,7 @@ def zip_events(*event_streams):
         min_sleep_amt = min(get_sleep_time(event) for event in sleep_events)
         yield ('sleep', min_sleep_amt); 'do the minimum sleep'
 
-        'subtract that minimum sleep amt from all the other sleeps'
+        # subtract that minimum sleep amt from all the other sleeps
         debug_log("supposedly all these are sleep events:")
         for i,event in enumerate(next_event):
             debug_log("i:",i,"event:",event)
@@ -1960,9 +1958,18 @@ def is_sleep_event(event):
 
 def get_sleep_time(event):
     if is_sleep_event(event):
-        return get_dur(event[1])
+        return event[1]
     else:
         return None
+
+# solidify so any swung_dur funcs are already called
+def solidify_event(event):
+    if is_sleep_event(event):
+        new_event = list(event)
+        new_event[1] = get_dur(event[1]) # collapse any dur iterator functions
+        return tuple(new_event)
+    else:
+        return event
 
 def open_chord(pitches):
     'move 1 or more internal voices up an octave to open the voicing'
