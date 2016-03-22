@@ -314,15 +314,15 @@ def goof_around(env): #todo need this anymore?
         midi.panic()
 '''
 
-def ev_goof_around(env, drums=False):
+def ev_goof_around(env, drums=False, overall_drums=False):
     while True:
-        if drums:
+        if overall_drums:
             events = midi.zipe(
-                ev_funcs(env),
+                ev_funcs(env, drums=drums),
                 midi.ev_drums(),
             )
         else:
-            events = ev_funcs(env)
+            events = ev_funcs(env, drums=drums)
         for e in events:
             yield e
 
