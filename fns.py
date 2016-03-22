@@ -304,16 +304,6 @@ def some_end_parts(*parts):
     else:
         return my_parts
 
-'''
-def goof_around(env): #todo need this anymore?
-    try:
-        while True:
-            play_funcs(env)
-    except KeyboardInterrupt:
-        print("Bye!")
-        midi.panic()
-'''
-
 def ev_goof_around(env, drums=False, overall_drums=False):
     while True:
         if overall_drums:
