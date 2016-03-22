@@ -15,11 +15,12 @@ import copy
 
 DURATION = .2
 VELOCITY = 100
+VERBOSE = False
 
 
 def debug_log(*args):
-    pass
-    #print(*args)
+    if VERBOSE:
+        print(*args)
 
 
 def close_midi_handler(signal, frame):
