@@ -19,7 +19,7 @@ VERBOSE = False
 chord = None
 sounding_chord = None
 
-def log(*args):
+def debug_log(*args):
     if VERBOSE:
         print(*args)
 
@@ -89,7 +89,7 @@ def ev_funcs(env, drums=False):
 def ev_maybe_delay():
     if SOMETIMES_DELAY and coinflip(2):
         delay_len = options(8,16,24,32) #,48,64)
-        log('.' * delay_len)
+        debug_log('.' * delay_len)
         delay = '-' * delay_len
         for e in midi.ev_strn(
             delay, vel=MEL_VEL,
@@ -130,11 +130,11 @@ def fname2mus_strn(fname):
 
 @typerule(fname=str)
 def print_fname(fname):
-    log(fname + '()')
+    debug_log(fname + '()')
 
 def print_response(response):
     if is_string(response):
-        log(' '*RESPONSE_OFFSET + str(response))
+        debug_log(' '*RESPONSE_OFFSET + str(response))
     else:
         pass
 
@@ -156,20 +156,20 @@ def ev_func_init(fn):
     # do start tempo change
     start_dur = get_start_dur(fn)
     if start_dur is not None:
-        #log('set DURATION',duration)
+        #debug_log('set DURATION',duration)
         DURATION = start_dur
 
     # do chord change if any
     start_chord = get_start_chord(fn)
     if start_chord:
-        #log('set chord',chord)
+        #debug_log('set chord',chord)
         chord = start_chord
         for e in ev_chord_change(): yield e
 
     # do instrument change if any
     start_inst = get_start_instruments(fn)
     if start_inst is not None:
-        #log('set INSTRUMENTS',start_inst)
+        #debug_log('set INSTRUMENTS',start_inst)
         choose_instruments(start_inst)
 
 
@@ -280,7 +280,7 @@ def chord_offset():
     return RESPONSE_OFFSET / 2
 
 def print_chord(chord):
-    log(' '*chord_offset() + "[" + chord + "]")
+    debug_log(' '*chord_offset() + "[" + chord + "]")
 
 def musicall(fn): #todo args
     play_func(fn, do_response=True)
@@ -376,11 +376,11 @@ def choose_instruments(args): #todo clean up / simplify
 
     # description
     if user_specified_instruments:
-        log("setting custom instruments", (inst0, inst1))
+        debug_log("setting custom instruments", (inst0, inst1))
     elif do_sug:
-        log("known cool instrument combo", (inst0, inst1))
+        debug_log("known cool instrument combo", (inst0, inst1))
     else:
-        log("experimental random instrument", (inst0, inst1))
+        debug_log("experimental random instrument", (inst0, inst1))
 
     # actually changes patches
     midi.midi_program_change(inst0, chan=0)
@@ -392,12 +392,12 @@ def choose_instruments(args): #todo clean up / simplify
 
 def change_duration(dur):
     global DURATION
-    log("Changing tempo to " + str(dur))
+    debug_log("Changing tempo to " + str(dur))
     DURATION = dur
 
 def mult_duration(durmult):
     global DURATION
-    log("Multiplying tempo by factor of " + str(durmult))
+    debug_log("Multiplying tempo by factor of " + str(durmult))
     DURATION *= durmult
 
 def play_id(strn):
@@ -407,7 +407,7 @@ def play_id(strn):
 # @start_chord decorator
 def start_chord(the_chord):
     def outer(func):
-        #log('@start_chord',the_chord)
+        #debug_log('@start_chord',the_chord)
         func.chord = the_chord
         return func
     return outer
@@ -415,7 +415,7 @@ def start_chord(the_chord):
 # @start_dur decorator
 def start_dur(dur):
     def outer(func):
-        #log('@start_dur',dur)
+        #debug_log('@start_dur',dur)
         func.duration = dur
         return func
     return outer
@@ -423,7 +423,7 @@ def start_dur(dur):
 # @start_instrument decorator
 def start_instruments(inst):
     def outer(func):
-        #log('@start_instrument',inst)
+        #debug_log('@start_instrument',inst)
         func.instruments = inst
         return func
     return outer
