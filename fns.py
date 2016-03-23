@@ -15,6 +15,7 @@ INSTRUMENTS = None
 SHOW_NOTES = True
 midi.SHOW_NOTE_NAMES = False
 VERBOSE = False
+PLAY_NAME = True
 
 chord = None
 sounding_chord = None
@@ -68,6 +69,7 @@ def ev_funcs(env, drums=False):
     funcs = get_funcs(env).items()
     random.shuffle(funcs)
     for func_name,func in funcs:
+        debug_log("func",func)
         if coinflip():
             times = 1
         else:
@@ -87,7 +89,7 @@ def ev_funcs(env, drums=False):
             yield e
 
 def ev_maybe_delay():
-    if SOMETIMES_DELAY and coinflip(2):
+    if SOMETIMES_DELAY and not PAUSE_DISABLED and coinflip(2):
         delay_len = options(8,16,24,32) #,48,64)
         debug_log('.' * delay_len)
         delay = '-' * delay_len
@@ -152,25 +154,25 @@ def play_func(fn, do_response=None): #todo will we need this anymore? (now we ha
 
 def ev_func_init(fn):
     global chord, DURATION
-
-    # do start tempo change
+    #{ do start tempo change
     start_dur = get_start_dur(fn)
     if start_dur is not None:
         #debug_log('set DURATION',duration)
         DURATION = start_dur
-
-    # do chord change if any
+    #}
+    #{ do chord change if any
     start_chord = get_start_chord(fn)
     if start_chord:
         #debug_log('set chord',chord)
         chord = start_chord
         for e in ev_chord_change(): yield e
-
-    # do instrument change if any
+    #}
+    #{ do instrument change if any
     start_inst = get_start_instruments(fn)
     if start_inst is not None:
         #debug_log('set INSTRUMENTS',start_inst)
         choose_instruments(start_inst)
+    #}
 
 
 # play function name
@@ -186,26 +188,24 @@ def ev_func_name(fname, pause):
 
 
 # event-stream-based version of play_func
-def ev_func(fn, do_response=None):
-
-    global chord, DURATION #todo not needed anymore, ev_init has it?
-
+def ev_func(fn, do_response=None, play_name=None):
+    global chord, DURATION #todo not needed anymore, ev_func_init has it?
+    if play_name is None: play_name = PLAY_NAME
     fname = get_fname(fn)
-
     if not is_lambda(fname):
         for e in ev_func_init(fn):
             yield e
-
-        #todo find a simpler way for last_pitch -
-            # maybe allow the ev_pitches to write into
-            # some shared value, like a list or dict?
-            # (maybe not tho, this seems maybe ok)
+        #{ #todo maybe find a simpler way for last_pitch -
+                # maybe allow the ev_pitches to write into
+                # some shared value, like a list or dict?
+                # (maybe not tho, this seems maybe ok)
         last_pitch = None
-        pause1 = pause_amt()
-        for e in ev_func_name(fname, pause1):
-            last_pitch = midi.maybe_set_pitch(last_pitch, e)
-            yield e
-
+        pause1 = pause_amt() #todo why use the same pause for 1st and 2nd part?
+        if play_name:
+            for e in ev_func_name(fname, pause1):
+                last_pitch = midi.maybe_set_pitch(last_pitch, e)
+                yield e
+        #}
         # maybe run function and play response
         if do_response is None:
             do_response = True #coinflip()
@@ -213,6 +213,7 @@ def ev_func(fn, do_response=None):
             #todo figure out last_pitch / prev_pitch stuff
             for e in ev_fn_response(fn, pause1=pause1, prev_pitch=last_pitch):
                 yield e
+        
 
 def ev_fn_response(fn, pause1=None, prev_pitch=None):
     if is_function(fn):
