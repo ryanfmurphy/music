@@ -340,9 +340,15 @@ def setup():
         print("Leaving instruments the same")
 
 
+def is_py_filename(arg):
+    return arg[-3:] == '.py'
+
+
 def choose_instruments(args): #todo clean up / simplify
 
     if args == 'rnd': args = ['rnd']
+    if len(args) and is_py_filename(args[0]):
+        args = args[1:]
 
     sug0,sug1 = midi.cool_inst_combo()
     do_sug = True # coinflip()
