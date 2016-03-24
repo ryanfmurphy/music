@@ -1,0 +1,2 @@
+#!/bin/sh
+python -c "import fns, midi; fns.choose_instruments(midi.cool_inst_combo())"
