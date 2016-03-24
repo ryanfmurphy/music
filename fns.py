@@ -341,7 +341,7 @@ def setup():
 
 
 def is_py_filename(arg):
-    return arg[-3:] == '.py'
+    return isinstance(arg, str) and arg[-3:] == '.py'
 
 
 def choose_instruments(args): #todo clean up / simplify
