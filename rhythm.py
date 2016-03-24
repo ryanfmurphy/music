@@ -1,12 +1,27 @@
 # use with python3? nawwww
 
 '''
-#todo beat detection
-    - the user hits a key repeatedly and the computer figures out how much time is going on between
+rhythm.py - beat detection
+--------------------------
+_by Ryan Murphy_
 
-#todo running avg function
+* the user hits keys repeatedly,
+  (notes: abcdefg and other ones for sharps and flats)
+  and then "q" to quit
+* and the computer figures out how much time
+  is going on between
+* adjusts using a running avg function
 
-#todo people new getkey stuff
+todo
+----
+* \#todo save duration
+* \#todo save instrument
+* \#todo listen to length of last note before 'q'
+* \#todo stable record mode
+* \#todo layer multiple parts - at first just stable record mode
+* \#todo support a swung model of playing
+* \#todo improve the rhythmic interpretation
+  (add/tailor fractional guesses and running avg)
 
 '''
 
@@ -66,7 +81,7 @@ class Beat(object):
                 Fraction(1,4), Fraction(1,2), Fraction(3,4),
                 # Fraction(1,3),
                 Fraction(1), Fraction(3,2),
-                    # Fraction(5,4), Fraction(7,4), 
+                    Fraction(5,4), #Fraction(7,4), 
                 Fraction(2), Fraction(3,1),
                     Fraction(5,2),
                 Fraction(4),
@@ -202,7 +217,7 @@ def listen():
             #print('delta len guess:', beat.delta_len_guess)
             #print('rolling beat len guess:', rolling_beat_len_guess)
             beat.print_which_beat()
-            print(midi.show_list_spatially((note,), None, offset=30))
+            print(midi.show_notes_spatially((note,), None, offset=30))
 
 def listen_and_save():
     beats, note_strn = listen()
@@ -231,9 +246,9 @@ def save_melody_to_db(note_strn):
     else:
         conn,cur = None,None
     if conn and cur:
-        #result = cur.execute('INSERT INTO melody (melody) VALUES ($melody$'+note_strn+'$melody$);')
-        #cur.execute('PREPARE insert_melody AS INSERT INTO melody (melody) VALUES (?);')
-        result = cur.execute('INSERT INTO melody (melody) VALUES (%s);', (note_strn,))
+        #todo try prepared statments
+        # cur.execute('prepare insert_melody as insert into melody (melody) values (?);')
+        result = cur.execute('insert into melody (melody) values (%s);', (note_strn,))
         conn.commit()
         print("Saved (at least I think so!)")
         return result
