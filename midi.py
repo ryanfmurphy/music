@@ -1079,7 +1079,7 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
                 adjusted_pos = pos + offset
                 if 0 <= adjusted_pos < max_width:
                     char = '|'
-                chars[adjusted_pos] = gray + char + nocolor
+                    chars[adjusted_pos] = gray + char + nocolor
     for pos in positions:
         if isinstance(pos, tuple):
             pos, chan = pos[0], pos[1]
