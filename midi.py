@@ -1872,11 +1872,12 @@ def play_something():
 'drum track'
 
 DRUM_CHAN = 9
-KICK, SNARE, HH = -12, -10, -6
+KICK, SNARE, HH = K,S,H = -12, -10, -6
 
 drum_beats = [
-    [KICK,KICK,(HH,KICK),KICK,SNARE,None,(HH,KICK),KICK,None,KICK,HH,KICK,SNARE,None,HH,None],
-    [KICK,None,HH,None,SNARE,None,HH,KICK,None,KICK,(KICK,HH),None,SNARE,None,HH,SNARE],
+    [K,K,(H,K),K,S,None,(H,K),K,None,K,H,K,S,None,H,None],
+    [K,None,H,None,S,None,H,K,None,K,(K,H),None,S,None,H,S],
+    [(K,H),H,H,H, (S,H),H,H,(K,H), H,(K,H),(K,H),H, (S,H),H,H,H],
 ]
 
 
