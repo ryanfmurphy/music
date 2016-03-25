@@ -78,7 +78,7 @@ def ev_funcs(env, drums=False):
             if drums:
                 events = midi.zipe(
                     ev_func(func),
-                    midi.ev_drums(),
+                    midi.ev_drums(dur=DURATION),
                     dont_finish={1}
                 )
             else:
@@ -310,7 +310,7 @@ def ev_goof_around(env, drums=False, overall_drums=False):
         if overall_drums:
             events = midi.zipe(
                 ev_funcs(env, drums=drums),
-                midi.ev_drums(),
+                midi.ev_drums(dur=DURATION),
             )
         else:
             events = ev_funcs(env, drums=drums)

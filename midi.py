@@ -1884,7 +1884,7 @@ drum_beats = [
 def ev_drums(dur=DURATION, vel=VELOCITY):
     beat = random.choice(drum_beats)
     while True:
-        for e in ev_pitches(beat, chan=DRUM_CHAN, vel=vel):
+        for e in ev_pitches(beat, dur=dur, chan=DRUM_CHAN, vel=vel):
             yield e
 
 def play_drums(dur=DURATION, vel=VELOCITY):
