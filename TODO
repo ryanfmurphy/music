@@ -1,6 +1,10 @@
 TODO
 ====
 
+* bracket chord notation within melodies:
+
+    cdefgfed[F]cfaf[G]g
+
 * doublecheck - leading hyphen means no pause?
 
 * global transpose (within fns.py interface)
