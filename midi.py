@@ -16,6 +16,7 @@ import copy
 DURATION = .2
 VELOCITY = 100
 VERBOSE = False
+SHOW_NOTES_OFFSET = 0
 
 
 def debug_log(*args):
@@ -184,7 +185,7 @@ class NoteDisplayer:
         print(
             show_notes_spatially(
                 notes, list(held_note_positions),
-                0, SHOW_NOTE_NAMES,
+                SHOW_NOTES_OFFSET, SHOW_NOTE_NAMES,
             )
         )
         self.prev_notes = self.notes
@@ -899,13 +900,13 @@ def strn2pitches(strn, prev_pitch=None):
 
 def ev_strn(strn, dur=DURATION, leave_sounding=False,
             show_notes=None, prev_pitch=None,
-            vel=VELOCITY, oct=4
+            vel=VELOCITY, oct=4, chan=0,
            ):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     return ev_pitches(
         strn2pitches(strn, prev_pitch),
-        dur=dur, vel=vel, oct=oct,
+        dur=dur, vel=vel, oct=oct, chan=chan,
         leave_sounding=leave_sounding,
         show_notes=show_notes,
     )
@@ -1059,7 +1060,7 @@ def iterable(x):
 
 
 #todo absorb show_notes_spatially() into NoteDisplayer class?
-def show_notes_spatially(positions, held_positions=None, offset=0, show_note_names=False):
+def show_notes_spatially(positions, held_positions=None, offset=SHOW_NOTES_OFFSET, show_note_names=False):
     #todo allow brighter colors / higher priority channels to take precedence
     nocolor = '\033[0m'
     gray = '\033[2m'
@@ -1095,6 +1096,7 @@ def show_notes_spatially(positions, held_positions=None, offset=0, show_note_nam
 
                 # color
                 if   chan == 1:         chan_col = magenta
+                elif chan == 2:         chan_col = yellow
                 elif chan == DRUM_CHAN: chan_col = red
                 else:                   chan_col = green
 
