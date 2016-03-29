@@ -37,6 +37,12 @@ except ImportError:
     my_db = None
 
 
+VERBOSE = True
+
+def debug_log(*args):
+    if VERBOSE: print(*args)
+
+
 class Beat(object):
 
     def __init__(self, prev_beat=None, avg_beat_time=None):
@@ -81,7 +87,7 @@ class Beat(object):
                 Fraction(1,4), Fraction(1,2), Fraction(3,4),
                 # Fraction(1,3),
                 Fraction(1), Fraction(3,2),
-                    Fraction(5,4), #Fraction(7,4), 
+                    #Fraction(5,4), #Fraction(7,4), 
                 Fraction(2), Fraction(3,1),
                     Fraction(5,2),
                 Fraction(4),
@@ -108,6 +114,7 @@ class Beat(object):
                 # pit the new ratio against the current winner
                 if distance_from_1 < best_distance_from_1:
                     best_ratio, best_distance_from_1 = possible_ratio, distance_from_1
+            debug_log("best_ratio: ", best_ratio)
             return best_ratio
         else:
             return Fraction(1)
@@ -188,7 +195,7 @@ def listen():
 
             # record the space before the note if any
             if prev_beat and beat.delta_len_guess:
-                subdivision_factor = 2
+                subdivision_factor = 4
                 remaining_time_slots = int(beat.delta_len_guess * subdivision_factor) - 1
                 note_chars.append('-' * remaining_time_slots)
             # record the note itself
@@ -228,7 +235,7 @@ def listen_and_save():
         user_input = getch()
         print(user_input)
         save = False
-        if user_input in ('cut','shave'):
+        if user_input in ('cut','shave','slice'):
             indexes = raw_input("Enter a pythonic slice to take (e.g. [:-1]) : ")
             note_strn = eval('note_strn' + indexes)
             save = True
