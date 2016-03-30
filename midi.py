@@ -1692,6 +1692,7 @@ def expand_chord(chord, pattern=None, oct_pattern=None):
     else:
         return strn2pitches(chordtxt[chord])
 
+# broken chord progression played with optional pattern #todo rename _cp
 def ev_cp(chord_progression, times=1, pattern=None, oct_pattern=None, dur=None):
     for i in range(times):
         for chord in chord_progression:
