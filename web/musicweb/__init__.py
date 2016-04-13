@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, current_app
 app = Flask(__name__)
 
 import logging, threading, os
+import music, melody
 logging.disable(logging.FATAL)
 
 @app.template_filter('enumerate')

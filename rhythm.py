@@ -255,7 +255,7 @@ def save_melody_to_db(note_strn):
     if conn and cur:
         #todo try prepared statments
         # cur.execute('prepare insert_melody as insert into melody (melody) values (?);')
-        result = cur.execute('insert into melody (melody) values (%s);', (note_strn,))
+        result = cur.execute('insert into music.melody (melody) values (%s);', (note_strn,))
         conn.commit()
         print("Saved (at least I think so!)")
         return result
