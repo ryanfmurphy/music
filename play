@@ -1,2 +1,7 @@
 #!/bin/sh
-python play.py $@
+
+#todo set path to a more reasonable default
+#todo set path in a central config file
+
+path="~/dev/py/music/songs"
+python "$path/play.py" $@
