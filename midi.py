@@ -913,7 +913,7 @@ def ev_strn(strn, dur=DURATION, leave_sounding=False,
 
 def play_strn(strn, dur=DURATION, leave_sounding=False,
               show_notes=None, prev_pitch=None,
-              vel=VELOCITY):
+              vel=VELOCITY, oct=4):
     if show_notes is None: show_notes = SHOW_NOTES
     if strn is None:
         return None
@@ -921,11 +921,12 @@ def play_strn(strn, dur=DURATION, leave_sounding=False,
         # playe returns the last pitch for continuity with subsequent melodies
         return playe(
             ev_strn(strn,
-                         dur=dur,
-                         leave_sounding=leave_sounding,
-                         show_notes=show_notes,
-                         prev_pitch=prev_pitch,
-                         vel=vel,
+                    dur=dur,
+                    leave_sounding=leave_sounding,
+                    show_notes=show_notes,
+                    prev_pitch=prev_pitch,
+                    vel=vel,
+                    oct=oct,
             )
         )
 
