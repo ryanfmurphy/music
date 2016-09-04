@@ -18,27 +18,54 @@ def play_ascii_txt(data):
             pause(pitches)
     music.play(pitches, dur=.02)
 
-def play_and_say(data):
+def say_it(chars):
+    chars = chars.replace("'", ' single quote ') \
+                 .replace('"', ' double quote ') \
+                 .replace('(', ' open paren ') \
+                 .replace(')', ' close paren ') \
+                 .replace('[', ' open bracket ') \
+                 .replace(']', ' close bracket ') \
+                 .replace('{', ' open brace ') \
+                 .replace('}', ' close brace ') \
+                 .replace('\\', ' backslash ') \
+                 .replace('/', ' slash ') \
+                 .replace('|', ' pipe ') \
+                 .replace('&', ' amp ') \
+                 .replace(';', ' semicolon ')
+    return sp.call(['sayv','.5',chars])
+
+def play_it(chars):
+    pitches = []
+    for t in range(3):
+        for d in chars:
+            pitches.append(
+                    None
+                if d in whitespace else
+                    ord(d)-48
+            )
+        pause(pitches)
+    music.play(pitches, dur=.1, vel=127)
+
+def play_and_say_words(data):
     lines = data.split('\n')
     for line in lines:
-        words = line.split(' ')
+        words = [word for word in line.split(' ') if len(word)>0]
         for word in words:
-            sp.call(['sayv','.5',word])
-            pitches = []
-            for t in range(3):
-                for d in word:
-                    pitches.append(ord(d)-48)
-                pause(pitches)
-            music.play(pitches, dur=.1, vel=127)
+            say_it(word)
+            play_it(word)
+        # now the whole line
+        if len(words) > 1:
+            say_it('whole line: ' + line)
+            play_it(line)
 
 whitespace = '\t\n '
 
 def play_and_say_lines(data):
     lines = data.split('\n')
     for line in lines:
-        sp.call(['sayv','.5',line])
+        say_it(line)
         pitches = []
-        for t in range(3):
+        for t in range(2):
             for d in line:
                 if d not in whitespace:
                     pitches.append(ord(d)-48)
@@ -50,7 +77,8 @@ if __name__=='__main__':
     filename = sys.argv[1]
     with open(filename) as fh:
         data = fh.read()
-        play_and_say_lines(data)
+        play_and_say_words(data)
+        #play_and_say_lines(data)
         #play_ascii_txt(data)
 
 
