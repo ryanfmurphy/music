@@ -1,8 +1,12 @@
 #!/bin/bash
 set -v
 SFPATH="/Users/murftown/dev/GeneralUser GS 1.44 FluidSynth"
-#fluidsynth -d "$SFPATH/GeneralUser GS FluidSynth v1.44.sf2"
-fluidsynth -d "$SFPATH/FluidR3 GM2-2.SF2"
+fluidsynth -d "$SFPATH/GeneralUser GS FluidSynth v1.44.sf2"
+#fluidsynth -d "$SFPATH/FluidR3 GM2-2.SF2"
+#fluidsynth -d "/Users/murftown/Downloads/OmegaGMGS2.sf2"
+#fluidsynth -d "/Users/murftown/Downloads/electricguitar.sf2"
+#fluidsynth -d "/Users/murftown/Downloads/FenderSquireBass.sf2"
+#fluidsynth -d "/Users/murftown/Downloads/Transverse_Flute.sf2"
 
 
 # in linux you may also need to start Jack Server:
