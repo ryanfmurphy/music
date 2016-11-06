@@ -3,5 +3,5 @@
 #todo set path to a more reasonable default
 #todo set path in a central config file
 
-path="~/dev/py/music/songs"
+path="~/dev/py/music"
 python "$path/play.py" $@
