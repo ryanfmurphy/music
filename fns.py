@@ -8,9 +8,13 @@ import itertools
 MEL_VEL = 110
 CHORD_VEL = 95
 RESPONSE_OFFSET = 30
-DURATION = .2 #music.swung_dur(.4,.2).next
+DURATION = .4 #music.swung_dur(.4,.2).next
+
+# long occasional pauses
 SOMETIMES_DELAY = True
+# short frequent breaths
 PAUSE_DISABLED = True
+
 INSTRUMENTS = None
 SHOW_NOTES = True
 midi.SHOW_NOTE_NAMES = False
@@ -46,6 +50,7 @@ def get_funcs(env):
     return {k:v for k,v in env.items()
             if is_function(v)}
 
+'''
 def play_funcs(env): #todo need this anymore? (ev_funcs now)
     if is_module(env):
         env = env.__dict__
@@ -59,16 +64,19 @@ def play_funcs(env): #todo need this anymore? (ev_funcs now)
         for x in range(times):
             play_func(func)
         maybe_delay()
+'''
 
 def maybe_delay(): #todo need this anymore?
     return midi.playe(ev_maybe_delay())
 
 def ev_funcs(env, drums=False):
+    debug_log("ev_funcs")
     if is_module(env):
         env = env.__dict__
     funcs = get_funcs(env).items()
     random.shuffle(funcs)
     for func_name,func in funcs:
+        debug_log("  top of loop")
         debug_log("func",func)
         if coinflip():
             times = 1
@@ -85,11 +93,19 @@ def ev_funcs(env, drums=False):
                 events = ev_func(func)
             for e in events:
                 yield e
+        debug_log("  maybe delay!")
         for e in ev_maybe_delay():
+            debug_log("  yes delay!")
             yield e
 
 def ev_maybe_delay():
-    if SOMETIMES_DELAY and not PAUSE_DISABLED and coinflip(2):
+    debug_log("DURATION="+str(DURATION))
+    debug_log("SOMETIMES_DELAY="+str(SOMETIMES_DELAY))
+    debug_log("PAUSE_DISABLED="+str(PAUSE_DISABLED))
+    my_coinflip = coinflip(4)
+    debug_log("my_coinflip="+str(my_coinflip))
+    #if SOMETIMES_DELAY and not PAUSE_DISABLED and my_coinflip:
+    if SOMETIMES_DELAY and my_coinflip:
         delay_len = options(8,16,24,32) #,48,64)
         debug_log('.' * delay_len)
         delay = '-' * delay_len
@@ -305,21 +321,28 @@ def some_end_parts(*parts):
     else:
         return my_parts
 
-def ev_goof_around(env, drums=False, overall_drums=False):
+# Q. what happens if drums & overall_drums are both True?
+# A. doesn't seem to make much difference
+def ev_goof_around(env, drums=True, overall_drums=False):
     while True:
+        # drums to be zipped alongside/independent?
         if overall_drums:
-            events = midi.zipe(
+            events = midi.zip_events(
                 ev_funcs(env, drums=drums),
                 midi.ev_drums(dur=DURATION),
             )
+        # vs drums being tightly coupled (if present)
         else:
             events = ev_funcs(env, drums=drums)
+        # go thru the events
         for e in events:
             yield e
 
 def goof_around(env, drums=False):
     try:
-        return midi.playe(ev_goof_around(env, drums=drums))
+        return midi.playe(
+            ev_goof_around(env, drums=drums)
+        )
     except KeyboardInterrupt:
         print("Bye!")
         midi.panic()
