@@ -1,7 +1,12 @@
 import music, sys, subprocess as sp
 
 def play_ascii_txt_simple(data):
-    return music.play([ord(d)-48 for d in data], dur=.01)
+    return music.play(
+        [   ord(d)-48
+            for d in data
+        ],
+        dur=.01
+    )
 
 def pause(pitches):
     pitches.append(None)
@@ -72,10 +77,18 @@ def play_and_say_lines(data):
             pause(pitches)
         music.play(pitches, dur=.1, vel=127)
         
+def get_file_handle(file_or_name):
+    if isinstance(file_or_name, file):
+        return file_or_name
+    else:
+        return open(filename_or_stream)
 
 if __name__=='__main__':
-    filename = sys.argv[1]
-    with open(filename) as fh:
+    file_or_name = sys.argv[1] \
+        if len(sys.argv) > 1 \
+        else sys.stdin
+    
+    with get_file_handle(file_or_name) as fh:
         data = fh.read()
         play_and_say_words(data)
         #play_and_say_lines(data)
