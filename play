@@ -1,7 +1,5 @@
 #!/bin/sh
-
-#todo set path to a more reasonable default
-#todo set path in a central config file
-
-path="~/dev/py/music"
+# Plays a single music python file
+# Usage: play <music_python_file>
+path="`dirname $0`"
 python "$path/play.py" $@
