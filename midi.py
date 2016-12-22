@@ -976,7 +976,7 @@ def ev_parts(parts, octaves=None, dur=DURATION,
         yield e
 
 def ev_strns(strns, octaves=None, dur=DURATION,
-                  vel=VELOCITY, show_notes=None):
+             vel=VELOCITY, show_notes=None):
     global SHOW_NOTES
     if show_notes is None: show_notes = SHOW_NOTES
     parts = [strn2pitches(s) for s in strns]
@@ -984,8 +984,10 @@ def ev_strns(strns, octaves=None, dur=DURATION,
                            vel=vel, show_notes=show_notes):
         yield e
 
-def play_strns(strns, octaves=None, dur=None, vel=VELOCITY):
-    playe(ev_strns(strns, octaves=octaves, dur=dur, vel=vel))
+def play_strns(strns, octaves=None, dur=None,
+               vel=VELOCITY, show_notes=None):
+    playe(ev_strns(strns, octaves=octaves, dur=dur,
+                   vel=vel, show_notes=show_notes))
 
 
 def play_whatever(thing, show_notes=None):
